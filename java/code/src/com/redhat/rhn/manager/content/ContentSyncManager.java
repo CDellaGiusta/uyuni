@@ -1002,7 +1002,16 @@ public class ContentSyncManager {
     }
 
     private void refreshCustomRepoAuthentication(List<SCCRepositoryJson> customReposIn, SCCCredentials creds) {
-        IssHub issHub = creds.getIssHub();
+        refreshCustomRepo(customReposIn, creds.getIssHub());
+    }
+
+    /**
+     * refreshes custom repositories
+     *
+     * @param customReposIn list of SCCRepositoryJson objects {@link SCCRepositoryJson}
+     * @param issHub        {@link IssHub} to use
+     */
+    public void refreshCustomRepo(List<SCCRepositoryJson> customReposIn, IssHub issHub) {
         if (issHub == null) {
             LOG.debug("Only Peripheral server manage custom channels via SCC API");
             return;
