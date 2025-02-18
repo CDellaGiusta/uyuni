@@ -40,6 +40,8 @@ import com.redhat.rhn.manager.ssm.SsmChannelDto;
 
 import com.suse.manager.model.hub.CustomChannelInfoJson;
 import com.suse.manager.model.hub.HubFactory;
+import com.suse.manager.model.hub.ModifyCustomChannelInfoJson;
+import com.suse.manager.webui.utils.token.TokenBuildingException;
 import com.suse.scc.SCCEndpoints;
 import com.suse.scc.model.SCCRepositoryJson;
 
@@ -61,6 +63,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import javax.persistence.NoResultException;
 import javax.persistence.TypedQuery;
@@ -1349,7 +1352,7 @@ public class ChannelFactory extends HibernateFactory {
     public static List<ContentSource> findContentSourceLikeUrl(String urlPart) {
         String urllike = urlPart;
         if (!urlPart.contains("%")) {
-            urllike = String.format("%%%s%%", urlPart);
+            urllike = java.lang.String.format("%%%s%%", urlPart);
         }
         return getSession().createNamedQuery("ContentSource.findLikeUrl", ContentSource.class)
                 .setParameter("urllike", urllike)
@@ -1478,7 +1481,8 @@ public class ChannelFactory extends HibernateFactory {
      * @return CustomChannelInfoJson the converted info of the custom channel
      */
     public static CustomChannelInfoJson toCustomChannelInfo(Channel customChannel, long peripheralOrgId,
-                                                            Optional<String> forcedOriginalChannelLabel) {
+                                                            Optional<String> forcedOriginalChannelLabel)
+            throws TokenBuildingException {
 
         if (!customChannel.isCustom()) {
             throw new IllegalArgumentException("Channel [" + customChannel.getLabel() + "] is not custom");
@@ -1666,30 +1670,16 @@ public class ChannelFactory extends HibernateFactory {
         }
     }
 
-    @FunctionalInterface
-    private interface SearchLabelMethod {
-        String getSearchLabel(CustomChannelInfoJson arg);
-    }
-
-    @FunctionalInterface
-    private interface LookupLabelMethod {
-        Object lookupWithLabel(String label);
-    }
-
-    @FunctionalInterface
-    private interface AccumulateFollowingMethod {
-        String accumulateFollowing(CustomChannelInfoJson arg);
-    }
-
-    private static void ensureExistingOrAboutToCreate(List<CustomChannelInfoJson> customChannelInfoJsonList,
-                                                      boolean emptyIsAllowed, String informationTypeString,
-                                                      SearchLabelMethod searchLabelMethod,
-                                                      LookupLabelMethod lookupLabelMethod,
-                                                      AccumulateFollowingMethod accumulateFollowingMethod) {
+    private static <T extends ModifyCustomChannelInfoJson>
+    void ensureExistingOrAboutToCreate(List<T> customChannelInfoJsonList,
+                                       boolean emptyIsAllowed, String informationTypeString,
+                                       Function<T, String> searchLabelMethod,
+                                       Function<String, Object> lookupLabelMethod,
+                                       Function<T, String> accumulateFollowingMethod) {
         Set<String> accumulationSet = new HashSet<>();
 
-        for (CustomChannelInfoJson customChannelInfo : customChannelInfoJsonList) {
-            String searchLabel = searchLabelMethod.getSearchLabel(customChannelInfo);
+        for (T customChannelInfo : customChannelInfoJsonList) {
+            String searchLabel = searchLabelMethod.apply(customChannelInfo);
             boolean isEmptySearchLabel = StringUtils.isEmpty(searchLabel);
 
             if (isEmptySearchLabel && (!emptyIsAllowed)) {
@@ -1698,7 +1688,7 @@ public class ChannelFactory extends HibernateFactory {
             }
 
             if ((!isEmptySearchLabel) && (!accumulationSet.contains(searchLabel))) {
-                if (null == lookupLabelMethod.lookupWithLabel(searchLabel)) {
+                if (null == lookupLabelMethod.apply(searchLabel)) {
                     throw new IllegalArgumentException(String.format("No %s named [%s] for custom channel [%s]",
                             informationTypeString, searchLabel, customChannelInfo.getLabel()));
                 }
@@ -1707,15 +1697,15 @@ public class ChannelFactory extends HibernateFactory {
 
             //when looking to a parent or original channel, this channel can be a parent/original of the following ones
             if (null != accumulateFollowingMethod) {
-                accumulationSet.add(accumulateFollowingMethod.accumulateFollowing(customChannelInfo));
+                accumulationSet.add(accumulateFollowingMethod.apply(customChannelInfo));
             }
         }
     }
 
-    private static void ensureValidOrgIds(List<CustomChannelInfoJson> customChannelInfoJsonList) {
+    private static <T extends ModifyCustomChannelInfoJson> void ensureValidOrgIds(List<T> customChannelInfoJsonList) {
         Set<Long> orgSet = new HashSet<>();
 
-        for (CustomChannelInfoJson customChannelInfo : customChannelInfoJsonList) {
+        for (T customChannelInfo : customChannelInfoJsonList) {
             Long orgId = customChannelInfo.getPeripheralOrgId();
 
             if (null == orgId) {
@@ -1732,5 +1722,139 @@ public class ChannelFactory extends HibernateFactory {
                 orgSet.add(orgId);
             }
         }
+    }
+
+    /**
+     * Ensures that the custom channels json modify info structure is valid, as well as all consequent data
+     *
+     * @param modifyCustomChannelList list of custom channel info structures to be checked
+     * @throws IllegalArgumentException if something is wrong
+     */
+    public static void ensureValidModifyCustomChannels(List<ModifyCustomChannelInfoJson> modifyCustomChannelList) {
+        for (ModifyCustomChannelInfoJson modifyCustomChannelInfo : modifyCustomChannelList) {
+
+            if (!ChannelFactory.doesChannelLabelExist(modifyCustomChannelInfo.getLabel())) {
+                throw new IllegalArgumentException("Channel to modify not found for custom channel [" +
+                        modifyCustomChannelInfo.getLabel() + "]");
+            }
+
+            ensureValidOrgIds(modifyCustomChannelList);
+
+            ensureExistingOrAboutToCreate(modifyCustomChannelList, true, "original channel",
+                    ModifyCustomChannelInfoJson::getOriginalChannelLabel, ChannelFactory::lookupByLabel,
+                    ModifyCustomChannelInfoJson::getLabel);
+        }
+    }
+
+    /**
+     * Modifies a custom channel according to the info structure
+     *
+     * @param modifyCustomChannelInfo the custom channel info with the info on how to modify the custom channel
+     * @return customChannel the modified custom channel
+     */
+    public static Channel modifyCustomChannel(ModifyCustomChannelInfoJson modifyCustomChannelInfo) {
+
+        Channel customChannel = ChannelFactory.lookupByLabel(modifyCustomChannelInfo.getLabel());
+        if (null == customChannel) {
+            throw new IllegalArgumentException("No existing custom channel to modify with label [" +
+                    modifyCustomChannelInfo.getLabel() + "]");
+        }
+
+        Org org = null;
+        if (null != modifyCustomChannelInfo.getPeripheralOrgId()) {
+            org = OrgFactory.lookupById(modifyCustomChannelInfo.getPeripheralOrgId());
+            if ((null != modifyCustomChannelInfo.getPeripheralOrgId()) && (null == org)) {
+                throw new IllegalArgumentException("No org id to modify [" +
+                        modifyCustomChannelInfo.getPeripheralOrgId() +
+                        "] for custom channel [" + modifyCustomChannelInfo.getLabel() + "]");
+            }
+        }
+
+        if ((null != modifyCustomChannelInfo.getOriginalChannelLabel()) &&
+                (StringUtils.isNotEmpty(modifyCustomChannelInfo.getOriginalChannelLabel()))) {
+
+            Channel originalChannel =
+                    ChannelFactory.lookupByLabel(modifyCustomChannelInfo.getOriginalChannelLabel());
+
+            if (null == originalChannel) {
+                throw new IllegalArgumentException("No original channel to modify as original [" +
+                        modifyCustomChannelInfo.getOriginalChannelLabel() +
+                        "] for custom channel [" + modifyCustomChannelInfo.getLabel() + "]");
+            }
+
+            if (customChannel.asCloned().isEmpty()) {
+                throw new IllegalArgumentException("Cannot set original channel " +
+                        "for not cloned custom channel [" + modifyCustomChannelInfo.getLabel() + "]");
+            }
+
+            customChannel.asCloned().get().setOriginal(originalChannel);
+        }
+
+        //null field = do not modify
+        if (null != modifyCustomChannelInfo.getPeripheralOrgId()) {
+            customChannel.setOrg(org);
+        }
+
+        if (null != modifyCustomChannelInfo.getBaseDir()) {
+            customChannel.setBaseDir(modifyCustomChannelInfo.getBaseDir());
+        }
+        if (null != modifyCustomChannelInfo.getName()) {
+            customChannel.setName(modifyCustomChannelInfo.getName());
+        }
+        if (null != modifyCustomChannelInfo.getSummary()) {
+            customChannel.setSummary(modifyCustomChannelInfo.getSummary());
+        }
+        if (null != modifyCustomChannelInfo.getDescription()) {
+            customChannel.setDescription(modifyCustomChannelInfo.getDescription());
+        }
+        if (null != modifyCustomChannelInfo.getProductNameLabel()) {
+            customChannel.setProductName(
+                    MgrSyncUtils.findOrCreateProductName(modifyCustomChannelInfo.getProductNameLabel()));
+        }
+        if (null != modifyCustomChannelInfo.isGpgCheck()) {
+            customChannel.setGPGCheck(modifyCustomChannelInfo.isGpgCheck());
+        }
+        if (null != modifyCustomChannelInfo.getGpgKeyUrl()) {
+            customChannel.setGPGKeyUrl(modifyCustomChannelInfo.getGpgKeyUrl());
+        }
+        if (null != modifyCustomChannelInfo.getGpgKeyId()) {
+            customChannel.setGPGKeyId(modifyCustomChannelInfo.getGpgKeyId());
+        }
+        if (null != modifyCustomChannelInfo.getGpgKeyFp()) {
+            customChannel.setGPGKeyFp(modifyCustomChannelInfo.getGpgKeyFp());
+        }
+        if (null != modifyCustomChannelInfo.getEndOfLifeDate()) {
+            customChannel.setEndOfLife(modifyCustomChannelInfo.getEndOfLifeDate());
+        }
+
+        if ((null != modifyCustomChannelInfo.getChannelProductProduct()) &&
+                (null != modifyCustomChannelInfo.getChannelProductVersion())) {
+            customChannel.setProduct(MgrSyncUtils.findOrCreateChannelProduct(
+                    modifyCustomChannelInfo.getChannelProductProduct(),
+                    modifyCustomChannelInfo.getChannelProductVersion()));
+        }
+        if (null != modifyCustomChannelInfo.getChannelAccess()) {
+            customChannel.setAccess(modifyCustomChannelInfo.getChannelAccess());
+        }
+        if (null != modifyCustomChannelInfo.getMaintainerName()) {
+            customChannel.setMaintainerName(modifyCustomChannelInfo.getMaintainerName());
+        }
+        if (null != modifyCustomChannelInfo.getMaintainerEmail()) {
+            customChannel.setMaintainerEmail(modifyCustomChannelInfo.getMaintainerEmail());
+        }
+        if (null != modifyCustomChannelInfo.getMaintainerPhone()) {
+            customChannel.setMaintainerPhone(modifyCustomChannelInfo.getMaintainerPhone());
+        }
+        if (null != modifyCustomChannelInfo.getSupportPolicy()) {
+            customChannel.setSupportPolicy(modifyCustomChannelInfo.getSupportPolicy());
+        }
+        if (null != modifyCustomChannelInfo.getUpdateTag()) {
+            customChannel.setUpdateTag(modifyCustomChannelInfo.getUpdateTag());
+        }
+        if (null != modifyCustomChannelInfo.isInstallerUpdates()) {
+            customChannel.setInstallerUpdates(modifyCustomChannelInfo.isInstallerUpdates());
+        }
+
+        return customChannel;
     }
 }
