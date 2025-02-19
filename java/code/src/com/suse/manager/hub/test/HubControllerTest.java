@@ -47,8 +47,6 @@ import com.suse.manager.hub.HubController;
 import com.suse.manager.model.hub.ChannelInfoJson;
 import com.suse.manager.model.hub.CustomChannelInfoJson;
 import com.suse.manager.model.hub.IssAccessToken;
-import com.suse.manager.model.hub.CustomChannelInfoJson;
-import com.suse.manager.model.hub.IssAccessToken;
 import com.suse.manager.model.hub.IssRole;
 import com.suse.manager.model.hub.ManagerInfoJson;
 import com.suse.manager.model.hub.ModifyCustomChannelInfoJson;
