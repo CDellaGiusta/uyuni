@@ -79,7 +79,7 @@ public class PaygAdminManager {
                 port = Integer.parseInt(paygProperties.getPort());
             }
             catch (NumberFormatException e) {
-                result.addFieldError(PaygAdminFields.port.name(), "payg.port_invalid");
+                result.addFieldError(PaygAdminFields.PORT.name(), "payg.port_invalid");
             }
         }
         if (!StringUtils.isEmpty(paygProperties.getBastionPort())) {
@@ -87,7 +87,7 @@ public class PaygAdminManager {
                 bastionPort = Integer.parseInt(paygProperties.getBastionPort());
             }
             catch (NumberFormatException e) {
-                result.addFieldError(PaygAdminFields.bastion_port.name(), "payg.bastion_port_invalid");
+                result.addFieldError(PaygAdminFields.BASTION_PORT.name(), "payg.bastion_port_invalid");
             }
         }
 
@@ -190,7 +190,7 @@ public class PaygAdminManager {
                     port = Integer.parseInt(paygProperties.getPort());
                 }
                 catch (NumberFormatException e) {
-                    result.addFieldError(PaygAdminFields.port.name(), "payg.port_invalid");
+                    result.addFieldError(PaygAdminFields.PORT.name(), "payg.port_invalid");
                 }
             }
             username = paygProperties.getUsername();
@@ -218,7 +218,7 @@ public class PaygAdminManager {
                     bastionPort = Integer.parseInt(paygProperties.getBastionPort());
                 }
                 catch (NumberFormatException e) {
-                    result.addFieldError(PaygAdminFields.bastion_port.name(), "payg.bastion_port_invalid");
+                    result.addFieldError(PaygAdminFields.BASTION_PORT.name(), "payg.bastion_port_invalid");
                 }
             }
             bastionHost = paygProperties.getBastionHost();
@@ -266,31 +266,31 @@ public class PaygAdminManager {
                 .orElseThrow(() -> new LookupException("Host not found: " + host));
         validateSetDetailsFields(details);
 
-        String description = (String)details.getOrDefault(PaygAdminFields.description.name(),
+        String description = (String)details.getOrDefault(PaygAdminFields.DESCRIPTION.name(),
                 paygSshData.getDescription());
 
-        Integer port = (Integer) details.getOrDefault(PaygAdminFields.port.name(),
+        Integer port = (Integer) details.getOrDefault(PaygAdminFields.PORT.name(),
                 paygSshData.getPort());
-        String username = (String)details.getOrDefault(PaygAdminFields.username.name(),
+        String username = (String)details.getOrDefault(PaygAdminFields.USERNAME.name(),
                 paygSshData.getUsername());
-        String password = (String)details.getOrDefault(PaygAdminFields.password.name(),
+        String password = (String)details.getOrDefault(PaygAdminFields.PASSWORD.name(),
                 paygSshData.getPassword());
-        String key = (String)details.getOrDefault(PaygAdminFields.key.name(),
+        String key = (String)details.getOrDefault(PaygAdminFields.KEY.name(),
                 paygSshData.getKey());
-        String keyPassword = (String)details.getOrDefault(PaygAdminFields.key_password.name(),
+        String keyPassword = (String)details.getOrDefault(PaygAdminFields.KEY_PASSWORD.name(),
                 paygSshData.getKeyPassword());
 
-        String bastionHost = (String)details.getOrDefault(PaygAdminFields.bastion_host.name(),
+        String bastionHost = (String)details.getOrDefault(PaygAdminFields.BASTION_HOST.name(),
                 paygSshData.getBastionHost());
-        Integer bastionPort = (Integer)details.getOrDefault(PaygAdminFields.bastion_port.name(),
+        Integer bastionPort = (Integer)details.getOrDefault(PaygAdminFields.BASTION_PORT.name(),
                 paygSshData.getBastionPort());
-        String bastionUsername = (String)details.getOrDefault(PaygAdminFields.bastion_username.name(),
+        String bastionUsername = (String)details.getOrDefault(PaygAdminFields.BASTION_USERNAME.name(),
                 paygSshData.getBastionUsername());
-        String bastionPassword = (String)details.getOrDefault(PaygAdminFields.bastion_password.name(),
+        String bastionPassword = (String)details.getOrDefault(PaygAdminFields.BASTION_PASSWORD.name(),
                 paygSshData.getBastionPassword());
-        String bastionKey = (String)details.getOrDefault(PaygAdminFields.bastion_key.name(),
+        String bastionKey = (String)details.getOrDefault(PaygAdminFields.BASTION_KEY.name(),
                 paygSshData.getBastionKey());
-        String bastionKeyPassword = (String)details.getOrDefault(PaygAdminFields.bastion_key_password.name(),
+        String bastionKeyPassword = (String)details.getOrDefault(PaygAdminFields.BASTION_KEY_PASSWORD.name(),
                 paygSshData.getBastionKeyPassword());
 
         return setDetails(paygSshData,

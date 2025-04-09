@@ -156,7 +156,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
 
         // Setup a product as it comes from SCC
         SCCProductJson p = new SCCProductJson(productId, name, identifier, version,
-                releaseType, "i686", friendlyName, productClass, ReleaseStage.released, "", false,
+                releaseType, "i686", friendlyName, productClass, ReleaseStage.RELEASED, "", false,
                 "", "", Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 Collections.emptyList(), null, false);
 
@@ -382,7 +382,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         HibernateFactory.getSession().flush();
         HibernateFactory.getSession().clear();
         SUSEProduct product = SUSEProductFactory.lookupByProductId(1150);
-        assertEquals(ReleaseStage.beta, product.getReleaseStage());
+        assertEquals(ReleaseStage.BETA, product.getReleaseStage());
     }
 
     @Test
@@ -1292,7 +1292,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
 
         // Setup a product as it comes from SCC
         SCCProductJson p = new SCCProductJson(productId, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 null, false);
         List<SCCProductJson> products = new ArrayList<>();
@@ -1334,7 +1334,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         suseProduct.setRelease(releaseType);
         suseProduct.setFriendlyName(friendlyName);
         suseProduct.setProductId(productId);
-        suseProduct.setReleaseStage(ReleaseStage.released);
+        suseProduct.setReleaseStage(ReleaseStage.RELEASED);
         PackageArch arch = PackageFactory.lookupPackageArchByLabel("i686");
         suseProduct.setArch(arch);
         SUSEProductFactory.save(suseProduct);
@@ -1342,7 +1342,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         String productClass = TestUtils.randomString();
         // Setup SCC product accordingly
         SCCProductJson p = new SCCProductJson(productId, null, name, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 null, false);
 
@@ -1588,7 +1588,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
 
         // Setup a product as it comes from SCC
         SCCProductJson prd = new SCCProductJson(productId, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 null, false);
         products.add(prd);
@@ -1604,7 +1604,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
 
         // Setup a 2nd product as it comes from SCC
         SCCProductJson prd2 = new SCCProductJson(productId, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(),
                 Collections.singletonList(10012345L), Collections.emptyList(),
                 null, false);
@@ -1651,7 +1651,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         String productClass = TestUtils.randomString();
 
         SCCProductJson product1 = new SCCProductJson(product1Id, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 null, false);
         products.add(product1);
@@ -1667,7 +1667,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         productClass = TestUtils.randomString();
 
         SCCProductJson product2 = new SCCProductJson(product2Id, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(),
                 Collections.singletonList(product1Id), Collections.emptyList(),
                 null, false);
@@ -1711,7 +1711,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         String productClass = TestUtils.randomString();
 
         SCCProductJson product1 = new SCCProductJson(product1Id, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(), Collections.emptyList(), Collections.emptyList(),
                 null, false);
         products.add(product1);
@@ -1727,7 +1727,7 @@ public class ContentSyncManagerTest extends JMockBaseTestCaseWithUser {
         productClass = TestUtils.randomString();
 
         SCCProductJson product2 = new SCCProductJson(product2Id, name, identifier, version, releaseType, "i686",
-                friendlyName, productClass, ReleaseStage.released, "", false, "", "",
+                friendlyName, productClass, ReleaseStage.RELEASED, "", false, "", "",
                 Collections.emptyList(), Collections.emptyList(),
                 Collections.singletonList(product1Id), Collections.emptyList(),
                 null, false);

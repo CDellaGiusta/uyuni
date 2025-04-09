@@ -440,7 +440,7 @@ public class RhelUtilsTest extends JMockBaseTestCaseWithUser {
                     suseProd.setName(shortName.toLowerCase());
                     suseProd.setVersion(version);
                     suseProd.setRelease(null);
-                    suseProd.setReleaseStage(ReleaseStage.released);
+                    suseProd.setReleaseStage(ReleaseStage.RELEASED);
                     suseProd.setFriendlyName(friendlyName + "  " + version);
                     suseProd.setProductId(new SecureRandom().nextInt(999999));
                     suseProd.setArch(null); // RES products can contain channels with different archs

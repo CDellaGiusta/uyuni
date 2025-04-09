@@ -791,7 +791,7 @@ public class DistUpgradeManagerTest extends BaseTestCaseWithUser {
         product.setFriendlyName("SUSE Test product " + name);
         product.setArch(null);
         product.setRelease("test");
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         product.setProductId(0);
         TestUtils.saveAndFlush(product);
         return product;

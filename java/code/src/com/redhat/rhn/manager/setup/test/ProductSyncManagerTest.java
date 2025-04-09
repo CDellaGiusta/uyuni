@@ -586,7 +586,7 @@ public class ProductSyncManagerTest extends BaseTestCaseWithUser {
         product.setProductId(RandomUtils.nextInt(0, 10000));
         product.setChannelFamily(family);
         product.setBase(isBase);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndReload(product);
         return product;
     }

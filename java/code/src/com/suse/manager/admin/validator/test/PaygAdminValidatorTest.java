@@ -59,7 +59,7 @@ public class PaygAdminValidatorTest {
                     }
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
-                        assertEquals(1, e.getResult().getFieldErrors().get(PaygAdminFields.description.name()).size());
+                        assertEquals(1, e.getResult().getFieldErrors().get(PaygAdminFields.DESCRIPTION.name()).size());
                     }
                 });
     }
@@ -95,7 +95,7 @@ public class PaygAdminValidatorTest {
                     }
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
-                        assertEquals(1, e.getResult().getFieldErrors().get(PaygAdminFields.host.name()).size());
+                        assertEquals(1, e.getResult().getFieldErrors().get(PaygAdminFields.HOST.name()).size());
                     }
                 });
 
@@ -131,7 +131,7 @@ public class PaygAdminValidatorTest {
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
                         assertEquals(1, e.getResult().getFieldErrors()
-                                .get(PaygAdminFields.port.name()).size());
+                                .get(PaygAdminFields.PORT.name()).size());
                     }
                 });
     }
@@ -166,7 +166,7 @@ public class PaygAdminValidatorTest {
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
                         assertEquals(1, e.getResult().getFieldErrors()
-                                .get(PaygAdminFields.username.name()).size());
+                                .get(PaygAdminFields.USERNAME.name()).size());
                     }
                 });
 
@@ -199,7 +199,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.password.name()).size());
+                    .get(PaygAdminFields.PASSWORD.name()).size());
         }
 
     }
@@ -231,7 +231,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.key_password.name()).size());
+                    .get(PaygAdminFields.KEY_PASSWORD.name()).size());
         }
 
     }
@@ -264,7 +264,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.bastion_host.name()).size());
+                    .get(PaygAdminFields.BASTION_HOST.name()).size());
         }
     }
 
@@ -281,7 +281,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.bastion_host.name()).size());
+                    .get(PaygAdminFields.BASTION_HOST.name()).size());
         }
     }
 
@@ -321,7 +321,7 @@ public class PaygAdminValidatorTest {
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
                         assertEquals(1, e.getResult().getFieldErrors()
-                                .get(PaygAdminFields.bastion_port.name()).size());
+                                .get(PaygAdminFields.BASTION_PORT.name()).size());
                     }
                 });
     }
@@ -356,7 +356,7 @@ public class PaygAdminValidatorTest {
                     catch (ValidatorException e) {
                         assertEquals(1, e.getResult().getFieldErrors().size());
                         assertEquals(1, e.getResult().getFieldErrors()
-                                .get(PaygAdminFields.bastion_username.name()).size());
+                                .get(PaygAdminFields.BASTION_USERNAME.name()).size());
                     }
                 });
 
@@ -398,7 +398,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.bastion_password.name()).size());
+                    .get(PaygAdminFields.BASTION_PASSWORD.name()).size());
         }
 
     }
@@ -430,7 +430,7 @@ public class PaygAdminValidatorTest {
         catch (ValidatorException e) {
             assertEquals(1, e.getResult().getFieldErrors().size());
             assertEquals(1, e.getResult().getFieldErrors()
-                    .get(PaygAdminFields.bastion_key_password.name()).size());
+                    .get(PaygAdminFields.BASTION_KEY_PASSWORD.name()).size());
         }
 
     }

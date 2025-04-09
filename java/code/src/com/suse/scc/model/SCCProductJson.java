@@ -599,7 +599,7 @@ public class SCCProductJson {
      * @return true if the product is a base product
      */
     public boolean isBaseProduct() {
-        return productType == ProductType.base;
+        return productType == ProductType.BASE;
     }
 
     /**

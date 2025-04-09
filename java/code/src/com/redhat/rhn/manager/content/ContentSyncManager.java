@@ -1811,7 +1811,7 @@ public class ContentSyncManager {
 
             // If the product is release the id should be stable
             // so we don't do the fuzzy matching to reduce unexpected behaviour
-            if (productJson.getReleaseStage() == ReleaseStage.released) {
+            if (productJson.getReleaseStage() == ReleaseStage.RELEASED) {
                 return Opt.fold(Optional.ofNullable(dbProductsById.get(productJson.getId())),
                         () -> {
                             SUSEProduct prod = createNewProduct(productJson, channelFamilyMap, packageArchMap);
@@ -1819,7 +1819,7 @@ public class ContentSyncManager {
                             return prod;
                         },
                         prod -> {
-                            if (prod.getReleaseStage() != ReleaseStage.released) {
+                            if (prod.getReleaseStage() != ReleaseStage.RELEASED) {
                                 // product switched from beta to released.
                                 // tag for later cleanup all assosicated repositories
                                 productIdsSwitchedToReleased.add(prod.getProductId());
@@ -1923,7 +1923,7 @@ public class ContentSyncManager {
                             repo.addChannelTemplate(channelTemplate);
                             return channelTemplate;
                         }, channelTemplate -> {
-                            if (entry.getReleaseStage() != ReleaseStage.released) {
+                            if (entry.getReleaseStage() != ReleaseStage.RELEASED) {
                                 // Only allowed to change in Alpha or Beta stage
                                 channelTemplate.setUpdateTag(entry.getUpdateTag().orElse(null));
                                 channelTemplate.setChannelLabel(entry.getChannelLabel());

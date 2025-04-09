@@ -111,7 +111,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setRelease("test");
         product.setProductId(RANDOM.nextInt(999999));
         product.setBase(true);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         product.setChannelFamily(family);
 
         product = TestUtils.saveAndReload(product);
@@ -140,7 +140,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setRelease("test");
         product.setProductId(RANDOM.nextInt(999999));
         product.setBase(isBase);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         product.setChannelFamily(ChannelFamilyTest.ensureChannelFamilyExists(user, family));
 
         product = TestUtils.saveAndReload(product);
@@ -331,7 +331,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1322);
         product.setChannelFamily(cfsles);
         product.setBase(true);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -341,7 +341,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setArch(PackageFactory.lookupPackageArchByLabel("x86_64"));
         product.setProductId(1324);
         product.setChannelFamily(cfha);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -352,7 +352,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1326);
         product.setChannelFamily(cfsles);
         product.setBase(true);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -363,7 +363,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1328);
         product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -374,7 +374,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1330);
         product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -385,7 +385,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1332);
         product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -396,7 +396,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1340);
         //product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -407,7 +407,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(2574);
         product.setChannelFamily(cfslem);
         product.setBase(true);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         ChannelFamily cfSlesSap = ChannelFamilyFactory.lookupByLabel("AiO", null);
@@ -426,7 +426,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(2467);
         product.setChannelFamily(cfSlesSap);
         product.setBase(true);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -437,7 +437,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(2558);
         product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -448,7 +448,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(2474);
         product.setChannelFamily(cfsles);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
     }
 
@@ -473,7 +473,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setProductId(1248L);
         product.setChannelFamily(toolsChannelFamily);
         product.setBase(false);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
     }
 
@@ -663,7 +663,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Mgmt Unlimited Virtual Z 1.2");
         product.setProductId(1200);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -671,7 +671,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Prov Unlimited Virtual Z 1.2");
         product.setProductId(1205);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -679,7 +679,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Mgmt Unlimited Virtual 1.2");
         product.setProductId(1078);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -687,7 +687,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Prov Unlimited Virtual 1.2");
         product.setProductId(1204);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -695,7 +695,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Mgmt Single 1.2");
         product.setProductId(1076);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -703,7 +703,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Prov Single 1.2");
         product.setProductId(1097);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -711,7 +711,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Monitoring Single 1.2");
         product.setProductId(1201);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -719,7 +719,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Monitoring Unlimited Virtual 1.2");
         product.setProductId(1202);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
 
         product = new SUSEProduct();
@@ -727,7 +727,7 @@ public class SUSEProductTestUtils extends HibernateFactory {
         product.setVersion("1.2");
         product.setFriendlyName("SUSE Manager Monitoring Unlimited Virtual Z 1.2");
         product.setProductId(1203);
-        product.setReleaseStage(ReleaseStage.released);
+        product.setReleaseStage(ReleaseStage.RELEASED);
         TestUtils.saveAndFlush(product);
     }
 
