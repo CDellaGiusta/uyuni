@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2025 SUSE LLC
  * Copyright (c) 2009--2014 Red Hat, Inc.
  *
  * This software is licensed to you under the GNU General Public License,
@@ -61,8 +62,19 @@ public class SystemCommandExecutor implements Executor {
      */
     @Override
     public int execute(String[] args) {
+        return execute(args, args);
+    }
+
+    /**
+     * Execute any command with the passed in arguments.
+     *
+     * @param args array of command you wish to execute.
+     * @param argsToLog array of command you wish to log.
+     * @return exit code of command executed.
+     */
+    public int execute(String[] args, String[] argsToLog) {
         if (logger.isDebugEnabled()) {
-            logger.debug("execute(String[] args={}) - start", Arrays.asList(args));
+            logger.debug("execute(String[] args={}) - start", Arrays.asList(argsToLog));
         }
 
         Runtime r = Runtime.getRuntime();
@@ -80,7 +92,7 @@ public class SystemCommandExecutor implements Executor {
             lastCommandError = inputStreamToString(p.getErrorStream());
             if (lastCommandError != null && !lastCommandError.trim().isEmpty()) {
                 String msg1 = "Error encountered executing (args=" +
-                        Arrays.asList(args) + ")";
+                        Arrays.asList(argsToLog) + ")";
                 String msg2 = "Error message from process: " + lastCommandError;
                 if (logError) {
                     logger.error(msg1);
@@ -107,7 +119,7 @@ public class SystemCommandExecutor implements Executor {
             logger.error("execute(String[])", ioe);
 
             String message = "";
-            for (String argIn : args) {
+            for (String argIn : argsToLog) {
                 message = message + argIn + " ";
             }
             logger.error("IOException while trying to exec: {}", message, ioe);

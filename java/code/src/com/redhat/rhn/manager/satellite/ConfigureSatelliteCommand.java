@@ -1,4 +1,5 @@
 /*
+ * Copyright (c) 2025 SUSE LLC
  * Copyright (c) 2009--2014 Red Hat, Inc.
  *
  * This software is licensed to you under the GNU General Public License,
@@ -39,7 +40,7 @@ public class ConfigureSatelliteCommand extends BaseConfigureCommand
      */
     private static Logger logger = LogManager.getLogger(ConfigureSatelliteCommand.class);
 
-    private final List<String> keysToBeUpdated;
+    protected final List<String> keysToBeUpdated;
 
     /**
      * Create a new ConfigureSatelliteCommand class with the
@@ -138,7 +139,6 @@ public class ConfigureSatelliteCommand extends BaseConfigureCommand
             logger.debug("storeConfiguration() - start");
         }
 
-        Executor e = getExecutor();
         if (keysToBeUpdated.isEmpty()) {
             return null;
         }
@@ -159,8 +159,24 @@ public class ConfigureSatelliteCommand extends BaseConfigureCommand
             }
         }
 
+        ValidatorError[] retVal = executeStore();
+        if (retVal != null) {
+            return retVal;
+        }
+
+        this.keysToBeUpdated.clear();
+
+        if (logger.isDebugEnabled()) {
+            logger.debug("storeConfiguration() - end - return value=null");
+        }
+        return null;
+
+    }
+
+    protected ValidatorError[] executeStore() {
         String[] commandArguments = getCommandArguments();
         if (commandArguments != null) {
+            Executor e = getExecutor();
             int exitcode = e.execute(commandArguments);
             if (exitcode != 0) {
                 ValidatorError[] retval = new ValidatorError[1];
@@ -173,13 +189,7 @@ public class ConfigureSatelliteCommand extends BaseConfigureCommand
                 return retval;
             }
         }
-        this.keysToBeUpdated.clear();
-
-        if (logger.isDebugEnabled()) {
-            logger.debug("storeConfiguration() - end - return value=null");
-        }
         return null;
-
     }
 
     /**
@@ -218,8 +228,14 @@ public class ConfigureSatelliteCommand extends BaseConfigureCommand
      * @param newValue to set
      */
     public void updateString(String configKey, String newValue) {
+        String newValueToLog = newValue;
+        if (configKey.equals(ConfigDefaults.HTTP_PROXY_PASSWORD)) {
+            newValueToLog = "*****";
+        }
+
         if (logger.isDebugEnabled()) {
-            logger.debug("updateString(String configKey={}, String newValue={}) - start", configKey, newValue);
+            logger.debug("updateString(String configKey={}, String newValue={}) - start",
+                    configKey, newValueToLog);
         }
 
         if (Config.get().getString(configKey) == null ||
