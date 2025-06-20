@@ -25,7 +25,7 @@ import javax.persistence.Table;
 @Table(name = "suseErrataAdvisoryMap")
 public class ErrataAdvisoryMap extends BaseDomainHelper {
 
-    private Long id;
+    private long id;
     private String advisory;
     private String announcementId;
     private String advisoryUri;
@@ -51,15 +51,17 @@ public class ErrataAdvisoryMap extends BaseDomainHelper {
     }
 
     @Id
+    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    public Long getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(Long idIn) {
+    public void setId(long idIn) {
         id = idIn;
     }
 
+    @Column(name = "advisory")
     public String getAdvisory() {
         return advisory;
     }
@@ -91,16 +93,14 @@ public class ErrataAdvisoryMap extends BaseDomainHelper {
         if (!(oIn instanceof ErrataAdvisoryMap that)) {
             return false;
         }
-        return Objects.equals(getId(), that.getId()) &&
-                Objects.equals(getAdvisory(), that.getAdvisory()) &&
+        return Objects.equals(getAdvisory(), that.getAdvisory()) &&
                 Objects.equals(getAnnouncementId(), that.getAnnouncementId()) &&
                 Objects.equals(getAdvisoryUri(), that.getAdvisoryUri());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(),
-                getAdvisory(),
+        return Objects.hash(getAdvisory(),
                 getAnnouncementId(),
                 getAdvisoryUri());
     }
