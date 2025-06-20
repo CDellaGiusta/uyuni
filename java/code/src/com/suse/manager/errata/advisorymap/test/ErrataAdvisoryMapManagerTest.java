@@ -28,7 +28,7 @@ import java.util.List;
 public class ErrataAdvisoryMapManagerTest extends RhnBaseTestCase {
     private static final String TEST_ADVISORY_MAP_CSV_FILE_NAME =
             "/com/suse/manager/errata/advisorymap/test/advisory-map.csv";
-    private static final long TEST_ADVISORY_MAP_RECORDS_NUM = 140596L;
+    private static final long TEST_ADVISORY_MAP_RECORDS_NUM = 140938L;
 
     private static final boolean PRINT_STD_OUTPUT = false;
     private static final boolean PERFORM_LONG_TESTS = false;
@@ -61,6 +61,13 @@ public class ErrataAdvisoryMapManagerTest extends RhnBaseTestCase {
         return advisoryMapManager.readAdvisoryMap(inputStream);
     }
 
+    public static void createTestAdvisoryMapDatabase() throws IOException {
+        InputStream inputStream = ErrataAdvisoryMapManagerTest.class
+                .getResourceAsStream(TEST_ADVISORY_MAP_CSV_FILE_NAME);
+        ErrataAdvisoryMapManager amm = new ErrataAdvisoryMapManager();
+        List<ErrataAdvisoryMap> advisoryMapList = amm.readAdvisoryMap(inputStream);
+        amm.populateErrataAdvisoryMap(advisoryMapList);
+    }
 
     @Test
     public void loadAdvisoryMapTest() throws IOException {
@@ -128,4 +135,15 @@ public class ErrataAdvisoryMapManagerTest extends RhnBaseTestCase {
         }
     }
 
+    @Test
+    public void downloadErrataAdvisoryMapFileTest() throws IOException {
+        if (PERFORM_LONG_TESTS) {
+            //test time: about 5 seconds for about 140K records
+            startTimeMeasure("Downloading errata advisory map");
+            List<ErrataAdvisoryMap> advisoryMapList = advisoryMapManager.downloadErrataAdvisoryMap();
+            stopTimeMeasure("Elapsed time: ");
+
+            testPrintOut(String.valueOf(advisoryMapList.size()));
+        }
+    }
 }

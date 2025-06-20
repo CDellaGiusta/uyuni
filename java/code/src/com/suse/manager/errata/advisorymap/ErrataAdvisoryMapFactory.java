@@ -16,7 +16,7 @@ import com.redhat.rhn.common.hibernate.HibernateFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.List;
+import java.util.Optional;
 
 public class ErrataAdvisoryMapFactory extends HibernateFactory {
 
@@ -52,11 +52,11 @@ public class ErrataAdvisoryMapFactory extends HibernateFactory {
      * @param advisory the advisory to look for
      * @return the ErrataAdvisoryMap item instance, if present
      */
-    public ErrataAdvisoryMap lookupByAdvisory(String advisory) {
+    public Optional<ErrataAdvisoryMap> lookupByAdvisory(String advisory) {
         return getSession()
                 .createQuery("FROM ErrataAdvisoryMap k WHERE k.advisory = :advisory", ErrataAdvisoryMap.class)
                 .setParameter("advisory", advisory)
-                .uniqueResult();
+                .uniqueResultOptional();
     }
 
     /**
@@ -76,42 +76,6 @@ public class ErrataAdvisoryMapFactory extends HibernateFactory {
     public void clearErrataAdvisoryMap() {
         getSession().createNativeQuery("DELETE FROM suseErrataAdvisoryMap").executeUpdate();
     }
-
-    /**
-     * TO BE REMOVED
-     *
-     * @param advisoryMapList the list of objects to save
-     */
-    public void populateErrataAdvisoryMapFirstAttemptWillBeRemoved(List<ErrataAdvisoryMap> advisoryMapList) {
-        if (0 == count()) {
-            //first time populating database
-            //this takes about 20 seconds for 140596 records
-            advisoryMapList.forEach(this::save);
-            return;
-        }
-
-        advisoryMapList.forEach(advisoryMapItem -> {
-            //this takes more than 45 minutes for 140596 records
-            ErrataAdvisoryMap advisoryMapTableEntry = lookupByAdvisory(advisoryMapItem.getAdvisory());
-
-            if (advisoryMapItem.equals(advisoryMapTableEntry)) {
-                //there is already an equal record, nothing to do
-                return;
-            }
-
-            if (null == advisoryMapTableEntry) {
-                //new added record
-                advisoryMapTableEntry = advisoryMapItem;
-            }
-            else {
-                //update existing record
-                advisoryMapTableEntry.setAnnouncementId(advisoryMapItem.getAnnouncementId());
-                advisoryMapTableEntry.setAdvisoryUri(advisoryMapItem.getAdvisoryUri());
-            }
-            getSession().saveOrUpdate(advisoryMapTableEntry);
-        });
-    }
-
 }
 
 
