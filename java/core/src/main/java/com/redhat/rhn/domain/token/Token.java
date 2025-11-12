@@ -34,7 +34,6 @@ import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.hibernate.annotations.CollectionType;
 import org.hibernate.annotations.ListIndexBase;
-import org.hibernate.annotations.Type;
 import org.hibernate.type.YesNoConverter;
 
 import java.util.ArrayList;
@@ -148,7 +147,7 @@ public class Token implements Identifiable {
     @OrderColumn(name = "position") // Handles list indexing.
     @ListIndexBase(1)
     @CollectionType(
-            type = "com.redhat.rhn.common.hibernate.ForceRecreationListType"
+            type = com.redhat.rhn.common.hibernate.ForceRecreationListType.class
     )
     private List<ConfigChannel> configChannels  = new ArrayList<>();
     /**
