@@ -116,7 +116,7 @@ BuildRequires:  java-saml
 BuildRequires:  jakarta-mail
 BuildRequires:  javapackages-tools
 BuildRequires:  javassist
-BuildRequires:  jboss-logging >= 3.5.0
+BuildRequires:  jboss-logging >= 3.6.1
 BuildRequires:  jdom
 BuildRequires:  joda-time
 BuildRequires:  jose4j
@@ -203,7 +203,7 @@ Requires:       java-saml
 Requires:       jakarta-mail
 Requires:       javapackages-tools
 Requires:       javassist
-Requires:       jboss-logging >= 3.5.0
+Requires:       jboss-logging >= 3.6.1
 Requires:       jdom
 Requires:       joda-time
 Requires:       jose4j
@@ -374,7 +374,7 @@ Requires:       httpcomponents-client
 Requires:       httpcomponents-core
 Requires:       java-%{java_version}-openjdk
 Requires:       javassist
-Requires:       jboss-logging >= 3.5.0
+Requires:       jboss-logging >= 3.6.1
 Requires:       jpa-api
 Requires:       jsch
 Requires:       log4j
