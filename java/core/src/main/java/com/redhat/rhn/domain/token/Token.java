@@ -46,8 +46,8 @@ import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinTable;
@@ -66,8 +66,8 @@ import jakarta.persistence.Table;
 public class Token implements Identifiable {
 
     @Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "token_seq")
-	@SequenceGenerator(name = "token_seq", sequenceName = "RHN_REG_TOKEN_SEQ", allocationSize = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "token_seq")
+    @SequenceGenerator(name = "token_seq", sequenceName = "RHN_REG_TOKEN_SEQ", allocationSize = 1)
     @Column(name = "id")
     private Long id;
 
