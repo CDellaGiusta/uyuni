@@ -286,20 +286,20 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         ImageInfo image2 = createImageInfo("myimage2", null, store, user);
 
         ImageInfo result =
-                ImageInfoFactory.lookupByName("myimage", "1.0.0", store.getId()).get();
+                ImageInfoFactory.lookupByName("myimage", "1.0.0", store).get();
 
         assertEquals(image, result);
 
-        result = ImageInfoFactory.lookupByName("myimage2", null, store.getId()).get();
+        result = ImageInfoFactory.lookupByName("myimage2", null, store).get();
 
         assertEquals(image2, result);
 
         assertFalse(ImageInfoFactory
-                .lookupByName("non-existent-name", "1.0.0", store.getId()).isPresent());
+                .lookupByName("non-existent-name", "1.0.0", store).isPresent());
         assertFalse(ImageInfoFactory
-                .lookupByName("myimage", "2.0.0", store.getId()).isPresent());
+                .lookupByName("myimage", "2.0.0", store).isPresent());
         assertFalse(ImageInfoFactory
-                .lookupByName("myimage", "1.0.0", anotherStore.getId()).isPresent());
+                .lookupByName("myimage", "1.0.0", anotherStore).isPresent());
     }
 
     @Test
@@ -330,7 +330,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
                 user);
         assertEquals(1, ImageInfoFactory.listImageInfos(user.getOrg()).size());
         ImageInfo info =
-                ImageInfoFactory.lookupByName("suma-3.1-base", "v1.0", store.getId()).get();
+                ImageInfoFactory.lookupByName("suma-3.1-base", "v1.0", store).get();
 
         // Assertions
         assertEquals("suma-3.1-base", info.getName());
@@ -380,7 +380,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
 
         // Image info should be added
         assertEquals(2, ImageInfoFactory.listImageInfos(user.getOrg()).size());
-        ImageInfo info2 = ImageInfoFactory.lookupByName("suma-3.1-base", "v1.0", store.getId()).get();
+        ImageInfo info2 = ImageInfoFactory.lookupByName("suma-3.1-base", "v1.0", store).get();
 
         // ImageInfo instance is preserved on new builds if it exists already with the same name/version and store
         assertEquals(info.getId(), info2.getId());
@@ -399,7 +399,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         assertEquals(3, infoList.size());
         infoList.forEach(i -> assertEquals("suma-3.1-base", i.getName()));
 
-        info = ImageInfoFactory.lookupByName("suma-3.1-base", "v2.0", store.getId()).get();
+        info = ImageInfoFactory.lookupByName("suma-3.1-base", "v2.0", store).get();
 
         // Assertions
         assertEquals(0, info.getChannels().size());
@@ -449,7 +449,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         assertTrue(channels.isPresent());
 
         assertFalse(
-                ImageInfoFactory.lookupByName("myimage", "1.0", store.getId()).isPresent());
+                ImageInfoFactory.lookupByName("myimage", "1.0", store).isPresent());
 
         try {
             ImageInfoFactory.scheduleImport(buildHost.getId(), "myimage", "1.0", store,
@@ -460,7 +460,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         }
 
         assertFalse(
-                ImageInfoFactory.lookupByName("myimage", "1.0", store.getId()).isPresent());
+                ImageInfoFactory.lookupByName("myimage", "1.0", store).isPresent());
 
         systemEntitlementManager.addEntitlementToServer(buildHost, EntitlementManager.CONTAINER_BUILD_HOST);
 
@@ -468,7 +468,7 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         assertNotNull(ImageInfoFactory.scheduleImport(buildHost.getId(), "myimage", "1.0",
                 store, channels, new Date(), user));
         ImageInfo info =
-                ImageInfoFactory.lookupByName("myimage", "1.0", store.getId()).get();
+                ImageInfoFactory.lookupByName("myimage", "1.0", store).get();
 
         assertTrue(info.isExternalImage());
         assertEquals(buildHost, info.getBuildServer());
