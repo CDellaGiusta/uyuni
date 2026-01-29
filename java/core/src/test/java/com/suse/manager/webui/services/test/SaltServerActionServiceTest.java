@@ -1035,7 +1035,7 @@ public class SaltServerActionServiceTest extends JMockBaseTestCaseWithUser {
 
         createChildServerAction(action, ServerAction::setStatusQueued, sshMinion, 5L);
         createChildServerAction(action, ServerAction::setStatusQueued, testMinionServer, 5L);
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
 
         SaltService saltServiceMock = mock(SaltService.class);
         SaltServerActionService testService = createSaltServerActionService(saltServiceMock, saltServiceMock);
@@ -1070,7 +1070,7 @@ public class SaltServerActionServiceTest extends JMockBaseTestCaseWithUser {
         createChildServerAction(action, ServerAction::setStatusCompleted, firstMinion, 5L);
         createChildServerAction(action, ServerAction::setStatusQueued, secondMinion, 5L);
 
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
 
         SaltService saltServiceMock = mock(SaltService.class);
         SaltServerActionService testService = createSaltServerActionService(saltServiceMock, saltServiceMock);

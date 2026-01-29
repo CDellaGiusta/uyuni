@@ -1312,7 +1312,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         ch21.setParentChannel(base2);
         ch22.setParentChannel(base2);
 
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
 
         systemManager.updateServerChannels(user, server, of(base2), Arrays.asList(ch21, ch22));
 
@@ -1351,7 +1351,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         ch21.setParentChannel(base2);
         ch22.setParentChannel(base2);
 
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
 
         systemManager.updateServerChannels(user, server, of(base2), Collections.emptyList());
 
@@ -1380,7 +1380,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         ch21.setParentChannel(base2);
         ch22.setParentChannel(base2);
 
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
 
         Assertions.assertThrows(ChannelSubscriptionException.class,
                 () -> systemManager.updateServerChannels(user, server, empty(), Arrays.asList(ch21, ch22)));
@@ -1405,7 +1405,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
 
         // flush & refresh iface because generated="insert"
         // on interfaceId does not seem to work
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
         HibernateFactory.getSession().refresh(minionFromDb);
 
         assertEquals("test system", minionFromDb.getName());
@@ -1438,7 +1438,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
 
         // flush & refresh iface because generated="insert"
         // on interfaceId does not seem to work
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
         HibernateFactory.getSession().refresh(minionFromDb);
 
         assertEquals("test system", minionFromDb.getName());
@@ -1468,7 +1468,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
 
         // flush & refresh iface because generated="insert"
         // on interfaceId does not seem to work
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
         HibernateFactory.getSession().refresh(minionFromDb);
 
         assertEquals("test system", minionFromDb.getName());
@@ -1517,7 +1517,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         String hwAddr = "be:b0:bc:a3:a7:ad";
         MinionServer emptyProfileMinion = systemManager.createSystemProfile(user, "test system",
                 singletonMap("hwAddress", hwAddr));
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
         HibernateFactory.getSession().evict(emptyProfileMinion);
 
         ServerTestUtils.createTestSystem(user);
@@ -1546,7 +1546,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         String hwAddr = "be:b0:bc:a3:a7:ad";
         MinionServer emptyProfileMinion = systemManager.createSystemProfile(user, "test system",
                 singletonMap("hwAddress", hwAddr));
-        HibernateFactory.getSession().flush();
+        TestUtils.flushSession();
         HibernateFactory.getSession().createNativeQuery("DELETE FROM suseMinionInfo").executeUpdate();
         HibernateFactory.getSession().evict(emptyProfileMinion);
 
