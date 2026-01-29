@@ -1518,7 +1518,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
         MinionServer emptyProfileMinion = systemManager.createSystemProfile(user, "test system",
                 singletonMap("hwAddress", hwAddr));
         TestUtils.flushSession();
-        HibernateFactory.getSession().evict(emptyProfileMinion);
+        TestUtils.evict(emptyProfileMinion);
 
         ServerTestUtils.createTestSystem(user);
         MinionServerFactoryTest.createTestMinionServer(user);
@@ -1548,7 +1548,7 @@ public class SystemManagerTest extends JMockBaseTestCaseWithUser {
                 singletonMap("hwAddress", hwAddr));
         TestUtils.flushSession();
         HibernateFactory.getSession().createNativeQuery("DELETE FROM suseMinionInfo").executeUpdate();
-        HibernateFactory.getSession().evict(emptyProfileMinion);
+        TestUtils.evict(emptyProfileMinion);
 
         DataResult<EmptySystemProfileOverview> emptyProfiles = SystemManager.listEmptySystemProfiles(user, null);
         assertTrue(emptyProfiles.isEmpty());
