@@ -92,7 +92,6 @@ BuildRequires:  apache-commons-text
 BuildRequires:  apache-commons-logging
 BuildRequires:  bcel
 BuildRequires:  mvn(net.bytebuddy:byte-buddy) >= 1.18.1
-BuildRequires:  mvn(net.bytebuddy:byte-buddy-dep) >= 1.18.1
 BuildRequires:  c3p0 >= 0.9.1
 BuildRequires:  classmate
 BuildRequires:  dom4j
@@ -181,7 +180,6 @@ Requires:       apache-commons-text
 Requires:       apache-commons-logging
 Requires:       bcel
 Requires:       mvn(net.bytebuddy:byte-buddy) >= 1.18.1
-Requires:       mvn(net.bytebuddy:byte-buddy-dep) >= 1.18.1
 Requires:       c3p0 >= 0.9.1
 Requires:       classmate
 Requires:       cobbler
@@ -364,7 +362,6 @@ Requires:       apache-commons-text
 Requires:       apache-commons-logging
 Requires:       bcel
 Requires:       mvn(net.bytebuddy:byte-buddy) >= 1.18.1
-Requires:       mvn(net.bytebuddy:byte-buddy-dep) >= 1.18.1
 Requires:       c3p0 >= 0.9.1
 Requires:       classmate
 Requires:       cobbler
