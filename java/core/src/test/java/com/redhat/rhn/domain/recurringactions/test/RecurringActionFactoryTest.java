@@ -50,6 +50,23 @@ public class RecurringActionFactoryTest extends BaseTestCaseWithUser {
     private static final String CRON_EXPR = "0 * * * * ?";
 
     @Test
+    public void testListMinionRecurringActionsWithNoGroups() throws Exception {
+        var action = new MinionRecurringAction();
+        var minion = MinionServerFactoryTest.createTestMinionServer(user);
+        // Empty the minion groups
+        minion.getGroups().clear();
+
+        action.setMinion(minion);
+        action.setName("test-recurring-action-1");
+        action.setCronExpr(CRON_EXPR);
+        action.setActionType(RecurringActionType.ActionType.HIGHSTATE);
+        RecurringActionFactory.save(action);
+
+        TestUtils.flushAndClearSession();
+
+        assertEquals(List.of(action), RecurringActionFactory.listMinionRecurringActions(minion));
+    }
+    @Test
     public void testListMinionRecurringActions() throws Exception {
         var action = new MinionRecurringAction();
         var minion = MinionServerFactoryTest.createTestMinionServer(user);
