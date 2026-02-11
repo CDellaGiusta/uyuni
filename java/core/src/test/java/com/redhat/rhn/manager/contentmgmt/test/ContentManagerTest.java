@@ -173,8 +173,13 @@ public class ContentManagerTest extends JMockBaseTestCaseWithUser {
     @Test
     public void testRemoveContentProject() {
         ContentProject cp = contentManager.createProject("cplabel", "cpname", "description", user);
+        contentManager.createEnvironment("cplabel", Optional.empty(), "one", "one", "one", false, user);
+        contentManager.createEnvironment("cplabel", Optional.of("one"), "two", "two", "two", false, user);
+        contentManager.createEnvironment("cplabel", Optional.of("two"), "three", "three", "three", false, user);
         int entitiesAffected = contentManager.removeProject(cp.getLabel(), user);
         assertEquals(1, entitiesAffected);
+        TestUtils.flushAndClearSession();
+
         Optional<ContentProject> fromDb = ContentManager.lookupProject("cplabel", user);
         assertFalse(fromDb.isPresent());
     }
@@ -845,7 +850,8 @@ public class ContentManagerTest extends JMockBaseTestCaseWithUser {
 
         // 3. remove a source and rebuild
         contentManager.detachSource("cplabel", SW_CHANNEL, channel.getLabel(), user);
-        cp = TestUtils.reload(cp);
+        assertEquals(1, cp.getActiveSources().size());
+
         contentManager.buildProject("cplabel", empty(), false, user);
         assertEquals(Long.valueOf(3), env.getVersion());
 

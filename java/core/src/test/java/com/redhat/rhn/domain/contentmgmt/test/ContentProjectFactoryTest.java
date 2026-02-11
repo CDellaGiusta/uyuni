@@ -721,4 +721,47 @@ public class ContentProjectFactoryTest extends BaseTestCaseWithUser {
         // feel free to modify and/or complete it
         ContentProjectFactory.listSoftwareEnvironmentTarget();
     }
+
+    @Test
+    public void canDeleteProject() {
+        ContentProject project = new ContentProject("test", "test", "test", user.getOrg());
+        ContentProjectFactory.save(project);
+
+        ContentEnvironment one = new ContentEnvironment("one", "one", null, project);
+        ContentEnvironment two = new ContentEnvironment("two", "two", null, project);
+        ContentEnvironment three = new ContentEnvironment("three", "three", null, project);
+
+        ContentProjectFactory.insertEnvironment(one, Optional.empty());
+        ContentProjectFactory.insertEnvironment(two, Optional.of(one));
+        ContentProjectFactory.insertEnvironment(three, Optional.of(two));
+
+        TestUtils.flushAndClearSession();
+
+        // Reload the project to ensure it was stored correctly
+        project = ContentProjectFactory.lookupProjectByNameAndOrg("test", user.getOrg()).orElse(null);
+        assertNotNull(project);
+
+        List<ContentEnvironment> contentEnvironments = ContentProjectFactory.listProjectEnvironments(project);
+        assertNotNull(contentEnvironments);
+        assertEquals(3, contentEnvironments.size());
+        assertEquals(List.of(one, two, three), contentEnvironments);
+
+        assertEquals(one, project.getFirstEnvironmentOpt().orElse(null));
+        assertNull(one.getPrevEnvironmentOpt().orElse(null));
+
+        assertEquals(two, one.getNextEnvironmentOpt().orElse(null));
+        assertEquals(one, two.getPrevEnvironmentOpt().orElse(null));
+
+        assertEquals(three, two.getNextEnvironmentOpt().orElse(null));
+        assertNull(three.getNextEnvironmentOpt().orElse(null));
+
+        TestUtils.clearSession();
+
+        project = ContentProjectFactory.lookupProjectByNameAndOrg("test", user.getOrg()).orElse(null);
+        ContentProjectFactory.remove(project);
+
+        TestUtils.flushAndClearSession();
+
+        assertTrue(ContentProjectFactory.lookupProjectByNameAndOrg("test", user.getOrg()).isEmpty());
+    }
 }

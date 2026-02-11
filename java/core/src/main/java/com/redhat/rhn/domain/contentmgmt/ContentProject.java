@@ -177,7 +177,7 @@ public class ContentProject extends BaseDomainHelper {
     /**
      * @return the firstEnvironment
      */
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "first_env_id")
     protected ContentEnvironment getFirstEnvironment() {
         return firstEnvironment;
