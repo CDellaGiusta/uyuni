@@ -26,7 +26,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-import com.redhat.rhn.GlobalInstanceHolder;
 import com.redhat.rhn.domain.action.Action;
 import com.redhat.rhn.domain.action.salt.inspect.ImageInspectActionDetails;
 import com.redhat.rhn.domain.channel.Channel;
@@ -79,6 +78,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -656,19 +658,42 @@ public class ImageInfoFactoryTest extends BaseTestCaseWithUser {
         return taskomaticApi;
     }
 
+    @ParameterizedTest
+    @ValueSource(strings = {"test-store"})
+    @NullSource
+    public void canDeleteImageWithObsoletes(String storeLabel) {
+        ImageStore store = storeLabel != null ? createImageStore(storeLabel, user) : null;
 
-    @Test
-    public void generatedCoverageTestDeleteWithObsoletes() {
-        // this test has been generated programmatically to test ImageInfoFactory.deleteWithObsoletes
-        // containing a hibernate query that is not covered by any test so far
-        // feel free to modify and/or complete it
-        ImageInfo arg0 = new ImageInfo();
-        arg0.setOrg(user.getOrg());
-        arg0.setName("test");
-        arg0.setObsolete(false);
-        arg0.setBuilt(true);
-        SaltApi arg1 = GlobalInstanceHolder.SALT_API;
-        ImageInfoFactory.deleteWithObsoletes(arg0, arg1);
+        // Main image
+        ImageInfo mainImage = createImageInfo("fedora-web-server", "39", store, user);
+        mainImage.setBuilt(true);
+        mainImage.setObsolete(false);
+        ImageInfoFactory.save(mainImage);
+
+        // Obsolete version
+        ImageInfo obsoleteImage = createImageInfo("fedora-web-server", "39", store, user);
+        obsoleteImage.setBuilt(true);
+        obsoleteImage.setObsolete(true); // This makes it eligible for deletion
+        ImageInfoFactory.save(obsoleteImage);
+
+        // Unrelated obsolete image
+        ImageInfo otherImage = createImageInfo("ubuntu-db-server", "22.04", store, user);
+        otherImage.setBuilt(true);
+        otherImage.setObsolete(true);
+        ImageInfoFactory.save(otherImage);
+
+        TestUtils.flushSession();
+
+        ImageInfoFactory.deleteWithObsoletes(mainImage, saltApiMock);
+        TestUtils.flushAndClearSession();
+
+        // Both the main and obsolete should be gone
+        assertTrue(ImageInfoFactory.lookupById(mainImage.getId()).isEmpty(), "Main image should be deleted");
+        assertTrue(ImageInfoFactory.lookupById(obsoleteImage.getId()).isEmpty(), "Obsolete image should be deleted");
+
+        // Unrelated image should still exist
+        assertTrue(ImageInfoFactory.lookupById(otherImage.getId()).isPresent(),
+                "Unrelated image should NOT be deleted");
     }
 
     @Test

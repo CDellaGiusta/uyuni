@@ -335,19 +335,19 @@ public class ImageInfoFactory extends HibernateFactory {
      */
     public static void deleteWithObsoletes(ImageInfo image, SaltApi saltApi) {
         if (!image.isObsolete() && image.isBuilt()) {
-            CriteriaBuilder builder = getSession().getCriteriaBuilder();
-            CriteriaQuery<ImageInfo> query = builder.createQuery(ImageInfo.class);
-            Root<ImageInfo> root = query.from(ImageInfo.class);
-            query.where(builder.and(
-                    builder.equal(root.get("name"), image.getName()),
-                    builder.equal(root.get("version"), image.getVersion()),
-                    builder.equal(root.get("store"),
-                                  Optional.ofNullable(image.getStore()).map(store -> store.getId()).orElse(null)),
-                    builder.isTrue(root.get("obsolete"))));
-            getSession().createQuery(query).getResultList().stream().forEach(obsImage -> {
-                delete(obsImage, saltApi);
-            });
+            getSession().createQuery("""
+                                      FROM ImageInfo ii
+                                     WHERE ii.name = :name
+                                             AND ii.version = :version
+                                             AND ((ii.store IS NULL AND :storeId IS NULL) OR (ii.store.id = :storeId))
+                                     """, ImageInfo.class)
+                    .setParameter("name", image.getName())
+                    .setParameter("version", image.getVersion())
+                    .setParameter("storeId", Optional.ofNullable(image.getStore()).map(ImageStore::getId).orElse(null))
+                    .stream()
+                    .forEach(obsImage -> delete(obsImage, saltApi));
         }
+
         delete(image, saltApi);
     }
 
