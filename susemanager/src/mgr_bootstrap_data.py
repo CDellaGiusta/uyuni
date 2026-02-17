@@ -1136,13 +1136,13 @@ DATA = {
         "DEST": DOCUMENT_ROOT + "/pub/repositories/oracle/9/bootstrap/",
     },
     "oracle-10-x86_64": {
-        "PDID": [],
+        "PDID": [-52, 3339],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/oracle/10/bootstrap/",
     },
     "oracle-10-aarch64": {
-        "PDID": [],
+        "PDID": [-57, 3338],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/oracle/10/bootstrap/",
@@ -1311,13 +1311,13 @@ DATA = {
         "DEST": DOCUMENT_ROOT + "/pub/repositories/almalinux/9/bootstrap/",
     },
     "almalinux-10-x86_64": {
-        "PDID": [],
+        "PDID": [-54, 3339],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/almalinux/10/bootstrap/",
     },
     "almalinux-10-aarch64": {
-        "PDID": [],
+        "PDID": [-53, 3338],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/almalinux/10/bootstrap/",
@@ -1397,13 +1397,13 @@ DATA = {
         "DEST": DOCUMENT_ROOT + "/pub/repositories/rockylinux/9/bootstrap/",
     },
     "rockylinux-10-x86_64": {
-        "PDID": [],
+        "PDID": [-56, 3339],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/rockylinux/10/bootstrap/",
     },
     "rockylinux-10-aarch64": {
-        "PDID": [],
+        "PDID": [-55, 3338],
         "BETAPDID": [],
         "PKGLIST": RES10,
         "DEST": DOCUMENT_ROOT + "/pub/repositories/rockylinux/10/bootstrap/",
