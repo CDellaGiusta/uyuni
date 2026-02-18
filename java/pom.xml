@@ -146,31 +146,21 @@
                 <version>4.13.0</version>
             </dependency>
             <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm</artifactId>
-                <version>9.9</version>
-            </dependency>
-            <dependency>
-                <groupId>org.ow2.asm</groupId>
-                <artifactId>asm-commons</artifactId>
-                <version>9.9</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.bcel</groupId>
-                <artifactId>bcel</artifactId>
-                <version>6.10.0</version>
+                <groupId>org.ehcache</groupId>
+                <artifactId>ehcache</artifactId>
+                <version>3.11.1</version>
+                <classifier>jakarta</classifier>
                 <exclusions>
-                    <!-- We do not provide this at runtime -->
                     <exclusion>
-                        <groupId>jakarta-regexp</groupId>
-                        <artifactId>jakarta-regexp</artifactId>
+                        <groupId>org.glassfish.jaxb</groupId>
+                        <artifactId>jaxb-runtime</artifactId>
                     </exclusion>
                 </exclusions>
             </dependency>
             <dependency>
                 <groupId>net.bytebuddy</groupId>
                 <artifactId>byte-buddy</artifactId>
-                <version>1.18.1</version>
+                <version>1.18.3</version>
             </dependency>
             <!-- c3p0 inherited from uyuni-java-parent -->
             <dependency>
@@ -259,9 +249,9 @@
                 <version>2.0.0-M4</version>
             </dependency>
             <dependency>
-                <groupId>suse</groupId>
-                <artifactId>apache-commons-fileupload2-jakarta-servlet6</artifactId>
-                <version>2.0.0~M4</version>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-fileupload2-jakarta-servlet6</artifactId>
+                <version>2.0.0-M4</version>
             </dependency>
             <dependency>
                 <groupId>commons-logging</groupId>
@@ -294,24 +284,14 @@
                 <version>2.1.4</version>
             </dependency>
             <dependency>
-                <groupId>suse</groupId>
-                <artifactId>jcache</artifactId>
+                <groupId>javax.cache</groupId>
+                <artifactId>cache-api</artifactId>
                 <version>1.1.1</version>
-            </dependency>
-            <dependency>
-                <groupId>suse</groupId>
-                <artifactId>jakarta.inject-api</artifactId>
-                <version>2.0.1</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.transaction</groupId>
                 <artifactId>jakarta.transaction-api</artifactId>
                 <version>2.0.1</version>
-            </dependency>
-            <dependency>
-                <groupId>org.apache.geronimo.specs</groupId>
-                <artifactId>geronimo-jta_1.1_spec</artifactId>
-                <version>1.1</version>
             </dependency>
             <dependency>
                 <groupId>com.google.code.gson</groupId>
@@ -358,13 +338,6 @@
                 <groupId>org.hibernate.orm</groupId>
                 <artifactId>hibernate-jcache</artifactId>
                 <version>7.1.6.Final</version>
-                <exclusions>
-                    <!-- We provide ehcache separately -->
-                    <exclusion>
-                        <groupId>net.sf.ehcache</groupId>
-                        <artifactId>ehcache</artifactId>
-                    </exclusion>
-                </exclusions>
             </dependency>
             <dependency>
                 <groupId>io.hypersistence</groupId>
@@ -451,8 +424,8 @@
                 </exclusions>
             </dependency>
             <dependency>
-                <groupId>suse</groupId>
-                <artifactId>jakarta-persistence-api</artifactId>
+                <groupId>jakarta.persistence</groupId>
+                <artifactId>jakarta.persistence-api</artifactId>
                 <version>3.2.0</version>
             </dependency>
             <dependency>
@@ -464,11 +437,6 @@
                 <groupId>suse</groupId>
                 <artifactId>java-saml-core</artifactId>
                 <version>2.4.0</version>
-            </dependency>
-            <dependency>
-                <groupId>org.javassist</groupId>
-                <artifactId>javassist</artifactId>
-                <version>3.29.2-GA</version>
             </dependency>
             <dependency>
                 <groupId>org.jboss.logging</groupId>
@@ -571,7 +539,7 @@
             <dependency>
                 <groupId>com.suse.salt</groupId>
                 <artifactId>salt-netapi-client</artifactId>
-                <version>1.0.0-SNAPSHOT</version>
+                <version>1.0.0</version>
             </dependency>
             <dependency>
                 <groupId>io.prometheus</groupId>
@@ -628,11 +596,6 @@
                 <groupId>com.impossibl.pgjdbc-ng</groupId>
                 <artifactId>spy</artifactId>
                 <version>0.8.7</version>
-            </dependency>
-            <dependency>
-                <groupId>org.jvnet.staxex</groupId>
-                <artifactId>stax-ex</artifactId>
-                <version>1.8</version>
             </dependency>
             <dependency>
                 <groupId>org.codehaus.woodstox</groupId>
@@ -705,7 +668,7 @@
             <dependency>
                 <groupId>com.sun.istack</groupId>
                 <artifactId>istack-commons-runtime</artifactId>
-                <version>3.0.7</version>
+                <version>4.2.0</version>
             </dependency>
             <dependency>
                 <groupId>jakarta.xml.bind</groupId>
@@ -804,11 +767,6 @@
                 <groupId>suse</groupId>
                 <artifactId>sitemesh</artifactId>
                 <version>2.1</version>
-            </dependency>
-            <dependency>
-                <groupId>suse</groupId>
-                <artifactId>statistics</artifactId>
-                <version>1.0.2</version>
             </dependency>
 
             <!-- Tomcat dependencies -->

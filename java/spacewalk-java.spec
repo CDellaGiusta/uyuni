@@ -90,12 +90,12 @@ BuildRequires:  apache-commons-jexl
 BuildRequires:  apache-commons-lang3 >= 3.4
 BuildRequires:  apache-commons-text
 BuildRequires:  apache-commons-logging
-BuildRequires:  bcel
 BuildRequires:  mvn(net.bytebuddy:byte-buddy) >= 1.18.1
 BuildRequires:  c3p0 >= 0.9.1
 BuildRequires:  classmate
 BuildRequires:  dom4j
 BuildRequires:  jaxb-api
+BuildRequires:  jaxb-core
 BuildRequires:  jakarta-activation
 BuildRequires:  angus-activation
 BuildRequires:  jakarta-websocket
@@ -114,7 +114,6 @@ BuildRequires:  java-saml
 BuildRequires:  jakarta-mail
 BuildRequires:  angus-mail-core
 BuildRequires:  javapackages-tools
-BuildRequires:  javassist
 BuildRequires:  jboss-logging >= 3.6.1
 BuildRequires:  jdom
 BuildRequires:  joda-time
@@ -127,7 +126,6 @@ BuildRequires:  log4j
 BuildRequires:  log4j-jcl
 BuildRequires:  log4j-slf4j
 BuildRequires:  netty
-BuildRequires:  objectweb-asm >= 9.9
 BuildRequires:  perl
 BuildRequires:  pgjdbc-ng
 BuildRequires:  postgresql-jdbc
@@ -180,12 +178,12 @@ Requires:       apache-commons-jexl
 Requires:       apache-commons-lang3
 Requires:       apache-commons-text
 Requires:       apache-commons-logging
-Requires:       bcel
 Requires:       mvn(net.bytebuddy:byte-buddy) >= 1.18.1
 Requires:       c3p0 >= 0.9.1
 Requires:       classmate
 Requires:       cobbler
 Requires:       jaxb-api
+Requires:       jaxb-core
 Requires:       jakarta-activation
 Requires:       angus-activation
 Requires:       jakarta-websocket
@@ -202,7 +200,6 @@ Requires:       java-saml
 Requires:       jakarta-mail
 Requires:       angus-mail-core
 Requires:       javapackages-tools
-Requires:       javassist
 Requires:       jboss-logging >= 3.6.1
 Requires:       jdom
 Requires:       joda-time
@@ -215,7 +212,6 @@ Requires:       log4j-jcl
 Requires:       log4j-slf4j
 Requires:       mgr-libmod
 Requires:       netty
-Requires:       objectweb-asm >= 9.9
 Requires:       pgjdbc-ng
 Requires:       prometheus-client-java
 Requires:       redstone-xmlrpc
@@ -363,7 +359,6 @@ Requires:       apache-commons-codec
 Requires:       apache-commons-lang3
 Requires:       apache-commons-text
 Requires:       apache-commons-logging
-Requires:       bcel
 Requires:       mvn(net.bytebuddy:byte-buddy) >= 1.18.1
 Requires:       c3p0 >= 0.9.1
 Requires:       classmate
@@ -372,7 +367,6 @@ Requires:       hibernate-models
 Requires:       httpcomponents-client
 Requires:       httpcomponents-core
 Requires:       java-%{java_version}-openjdk
-Requires:       javassist
 Requires:       jboss-logging >= 3.6.1
 Requires:       jpa-api
 Requires:       jsch

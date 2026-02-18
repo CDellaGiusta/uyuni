@@ -10,9 +10,6 @@ repositories:
     repository: openSUSE_Leap_15.6
   Leap_sle:
     url: https://download.opensuse.org/update/leap/15.6/sle
-  Uyuni_Jakarta:
-    project: systemsmanagement:Uyuni:Master:jakarta
-    repository: openSUSE_Leap_15.6
 artifacts:
   - artifact: simple-core
     # How comes that package is not noarch?
@@ -38,12 +35,12 @@ artifacts:
     repository: Leap_sle
   - artifact: redstone-xmlrpc
     jar: redstone-xmlrpc-[0-9.]+
-    repository: Uyuni_Jakarta
+    repository: Uyuni_Other
   - artifact: mybatis
     package: mybatis
     repository: Leap_sle
   - artifact: quartz
-    repository: Uyuni_Jakarta
+    repository: Uyuni_Other
   - artifact: log4j-core
     jar: log4j-core.jar
     package: log4j
