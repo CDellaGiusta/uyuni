@@ -17,6 +17,8 @@
         </Console>
     </Appenders>
     <Loggers>
+        <Logger name="com.suse" level="INFO" />
+        <Logger name="com.redhat.rhn" level="INFO" />
         <Root level="WARN">
             <AppenderRef ref="Console"/>
         </Root>

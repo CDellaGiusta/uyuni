@@ -77,6 +77,7 @@ BuildRequires:  apache-commons-fileupload2-core
 BuildRequires:  apache-commons-fileupload2-jakarta-servlet6
 BuildRequires:  %{apache_commons_validator}
 BuildRequires:  jcache
+BuildRequires:  ehcache >= 3.11.1
 BuildRequires:  ant
 BuildRequires:  ant-apache-regexp
 BuildRequires:  ant-contrib
@@ -169,6 +170,7 @@ Requires:       %{apache_commons_discovery}
 Requires:       apache-commons-fileupload2-core
 Requires:       apache-commons-fileupload2-jakarta-servlet6
 Requires:       jcache
+Requires:       ehcache >= 3.11.1
 Requires:       apache-commons-beanutils
 Requires:       apache-commons-cli
 Requires:       apache-commons-codec
