@@ -13,8 +13,8 @@ package com.redhat.rhn.domain.notification.types;
 import static com.redhat.rhn.common.hibernate.HibernateFactory.getSession;
 
 import com.redhat.rhn.common.localization.LocalizationService;
-
-import java.util.Optional;
+import com.redhat.rhn.domain.scc.SCCOrderItem;
+import com.redhat.rhn.domain.scc.SCCSubscription;
 
 
 public class SubscriptionWarning implements NotificationData {
@@ -38,22 +38,23 @@ public class SubscriptionWarning implements NotificationData {
         // Also, although the starts_at/expires_at subscription dates and the start_date/end_date order dates should be
         // consistent, we take the suseSCCOrderItem.end_date as reference to check the subscription validity in time
 
-        Optional<Boolean> result = getSession().createNativeQuery(
-                """
+        return getSession()
+                .createNativeQuery("""
                         SELECT EXISTS
                          (
                             SELECT ord.sku, ord.quantity, subs.scc_id, subs.name, subs.status, subs.subtype
-                            FROM suseSCCOrderItem AS ord
-                            JOIN suseSCCSubscription AS subs
-                            ON ord.subscription_id = subs.scc_id
-                            WHERE
-                            subs.subtype != 'internal' AND subs.subtype != 'test' AND
-                            ((subs.status = 'ACTIVE' AND ord.end_date < now() + interval '90 DAY')
-                                  OR (subs.status = 'EXPIRED' AND ord.end_date > now() - interval '30 day'))
+                              FROM suseSCCOrderItem AS ord
+                                        JOIN suseSCCSubscription AS subs ON ord.subscription_id = subs.scc_id
+                              WHERE subs.subtype != 'internal' AND subs.subtype != 'test' AND (
+                                        (subs.status = 'ACTIVE' AND ord.end_date < now() + interval '90 DAY')
+                                            OR (subs.status = 'EXPIRED' AND ord.end_date > now() - interval '30 day')
+                                    )
                         )
-                    """).uniqueResultOptional();
-
-        return result.orElse(false);
+                        """, Boolean.class)
+                .addSynchronizedEntityClass(SCCOrderItem.class)
+                .addSynchronizedEntityClass(SCCSubscription.class)
+                .uniqueResultOptional()
+                .orElse(false);
     }
 
     @Override

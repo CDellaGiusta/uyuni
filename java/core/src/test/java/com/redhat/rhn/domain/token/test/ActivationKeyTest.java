@@ -73,7 +73,7 @@ public class ActivationKeyTest extends BaseTestCaseWithUser {
         String note = k.getNote();
         String key = k.getKey();
 
-        TestUtils.saveAndFlush(k);
+        k = TestUtils.saveAndFlush(k);
 
         ActivationKey k2 = ActivationKeyFactory.lookupByKey(key);
         assertEquals(key, k2.getKey());
@@ -164,7 +164,7 @@ public class ActivationKeyTest extends BaseTestCaseWithUser {
         KickstartFactory.saveKickstartSession(sess);
         k.setKickstartSession(sess);
         ActivationKeyFactory.save(k);
-        reload(k);
+        k = TestUtils.reload(k);
 
         ActivationKey lookedUp = ActivationKeyFactory.lookupByKickstartSession(sess);
         assertNotNull(lookedUp);
@@ -191,7 +191,7 @@ public class ActivationKeyTest extends BaseTestCaseWithUser {
         assertEquals(1, s.getManagedGroups().size());
         ActivationKey key = createTestActivationKey(user, s);
         assertNotNull(key);
-        key = (ActivationKey) reload(key);
+        key = TestUtils.reload(key);
         assertNotNull(key.getId());
     }
 
