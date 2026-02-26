@@ -119,7 +119,6 @@ BuildRequires:  jboss-logging >= 3.6.1
 BuildRequires:  jdom
 BuildRequires:  joda-time
 BuildRequires:  jose4j
-BuildRequires:  jpa-api
 BuildRequires:  jsch
 BuildRequires:  jta
 BuildRequires:  libxml2
@@ -140,11 +139,9 @@ BuildRequires:  sitemesh
 BuildRequires:  snakeyaml >= 1.33
 BuildRequires:  spark-core
 BuildRequires:  spark-template-jade
-BuildRequires:  statistics
 BuildRequires:  struts >= 1.2.9
 BuildRequires:  tomcat11
 BuildRequires:  tomcat11-lib
-BuildRequires:  tomcat-taglibs-standard
 BuildRequires:  uyuni-base-server
 BuildRequires:  woodstox
 BuildRequires:  xalan-j2
@@ -229,13 +226,11 @@ Requires:       spacewalk-java-jdbc
 Requires:       spacewalk-java-lib = %{version}
 Requires:       spark-core
 Requires:       spark-template-jade
-Requires:       statistics
 Requires:       struts >= 1.2.9
 Requires:       sudo
 Requires:       susemanager-docs_en
 Requires:       system-lock-formula
 Requires:       tomcat11-lib
-Requires:       tomcat-taglibs-standard
 Requires:       woodstox
 Requires:       xalan-j2 >= 2.6.0
 Requires:       xerces-j2
@@ -370,7 +365,6 @@ Requires:       httpcomponents-client
 Requires:       httpcomponents-core
 Requires:       java-%{java_version}-openjdk
 Requires:       jboss-logging >= 3.6.1
-Requires:       jpa-api
 Requires:       jsch
 Requires:       log4j
 Requires:       log4j-jcl
@@ -379,8 +373,6 @@ Requires:       simple-core
 Requires:       spacewalk-java-config
 Requires:       spacewalk-java-jdbc
 Requires:       spacewalk-java-lib = %{version}
-Requires:       statistics
-Requires:       tomcat-taglibs-standard
 Requires:       xalan-j2 >= 2.6.0
 Requires:       xerces-j2
 Requires:       (/sbin/unix2_chkpwd or /usr/sbin/unix2_chkpwd)
