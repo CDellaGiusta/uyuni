@@ -78,6 +78,16 @@ public class CoCoAttestationAction extends Action {
      */
     @Override
     public Map<LocalCall<?>, List<MinionSummary>> getSaltCalls(List<MinionSummary> minionSummaries) {
+        // Overridden method getSaltCalls must call State.apply with a different salt request data file
+        // depending on the type of attestation. (amd_epyc_snpguest_request.sls, ibm_z_pvattest_request.sls)
+        //
+        // partition per minion type
+        // ServerCoCoAttestationConfig cfg = ????
+        // CoCoEnvironmentType envType = cfg.environmentType
+        // stati del test -> stato per i test
+        // envType.getSaltFile ( = ibm_z_pvattest_request.sls)
+
+
         return Map.of(
                 State.apply(Collections.singletonList(SaltParameters.COCOATTEST_REQUESTDATA), Optional.empty()),
                 minionSummaries
@@ -110,6 +120,19 @@ public class CoCoAttestationAction extends Action {
         }
 
         try {
+            // Overridden method handleUpdateServerAction must parse jsonResult with a different class,
+            // depending on the expected salt state apply results
+            //
+            // minion id = serverAction.getServer()
+            // ServerCoCoAttestationConfig cfg =
+            //      select * from suseServerCoCoAttestationConfig where server_id = '1000010000'
+            //
+            //CoCoEnvironmentType envType = cfg.environmentType
+            // envType.getRequestDataClass (=CoCoIbmZAttestationRequestData.class)
+            // requestData.asMap() -> json
+
+            //jsonResult.getAsJsonObject().get("")
+
             CoCoAttestationRequestData requestData = Json.GSON.fromJson(jsonResult, CoCoAttestationRequestData.class);
             report.setOutData(requestData.asMap());
             mgr.initializeResults(report);
