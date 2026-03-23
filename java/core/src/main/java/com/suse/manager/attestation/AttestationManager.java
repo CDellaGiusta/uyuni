@@ -33,6 +33,7 @@ import com.redhat.rhn.taskomatic.TaskomaticApiException;
 import com.suse.manager.model.attestation.AttestationFactory;
 import com.suse.manager.model.attestation.CoCoAttestationResult;
 import com.suse.manager.model.attestation.CoCoEnvironmentType;
+import com.suse.manager.model.attestation.CoCoResultType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
 import com.suse.manager.webui.services.pillar.MinionPillarManager;
@@ -40,9 +41,7 @@ import com.suse.manager.webui.services.pillar.MinionPillarManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Base64;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -57,7 +56,6 @@ public class AttestationManager {
     private static final Logger LOG = LogManager.getLogger(AttestationManager.class);
     private final AttestationFactory factory;
     private final TaskomaticApi taskomaticApi;
-    private SecureRandom secureRandom = new SecureRandom();
 
     /**
      * Constructor
@@ -186,11 +184,20 @@ public class AttestationManager {
     private void initializeReport(CoCoAttestationAction action, MinionServer minion) {
         ServerCoCoAttestationReport initReport = factory.createReportForServer(minion);
         initReport.setAction(action);
-        if (initReport.getEnvironmentType().isNonceRequired()) {
-            byte[] bytes = new byte[64];
-            secureRandom.nextBytes(bytes);
-            initReport.setInData(Map.of("nonce", Base64.getEncoder().encodeToString(bytes)));
-        }
+
+        ServerCoCoAttestationConfig config = minion.getOptCocoAttestationConfig()
+                .orElseThrow(() -> {
+                    LOG.error("Configuration not initialized");
+                    return new LookupException("Configuration not found");
+                });
+
+        Map<String, Object> attestationData = config.getEnvironmentType().getSupportedResultTypes().stream()
+                .map(CoCoResultType::getAttestationDataCreator)
+                .map(adc -> adc.buildAttestationInputData(config))
+                .flatMap(map -> map.entrySet().stream())
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+
+        initReport.setInData(attestationData);
 
         MinionPillarManager.INSTANCE.generatePillar(minion, false, MinionPillarManager.PillarSubset.GENERAL);
     }

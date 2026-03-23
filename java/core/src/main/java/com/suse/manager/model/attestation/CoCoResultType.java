@@ -19,19 +19,22 @@ import com.redhat.rhn.common.localization.LocalizationService;
 import java.util.Arrays;
 
 public enum CoCoResultType {
-    NONE(0),
-    SEV_SNP(1),
-    SECURE_BOOT(2);
+    NONE(0, new CoCoAttestationDataCreator()),
+    SEV_SNP(1, new CoCoAmdSevSnpAttestationDataCreator()),
+    SECURE_BOOT(2, new CoCoSecureBootAttestationDataCreator()),
+    IBM_PVATTEST(3, new CoCoIbmPvattestAttestationDataCreator());
     // ATTENTION: KEEP CoCoAttestationReport_queries.xml up to date !
 
     private final int value;
     private final String labelKey;
     private final String descriptionKey;
+    private final CoCoAttestationDataCreator attestationDataCreator;
 
-    CoCoResultType(int valueIn) {
+    CoCoResultType(int valueIn, CoCoAttestationDataCreator attestationDataCreatorIn) {
         value = valueIn;
         labelKey = "coco.resultType." + name().toLowerCase() + ".label";
         descriptionKey = "coco.resultType." + name().toLowerCase() + ".description";
+        attestationDataCreator = attestationDataCreatorIn;
     }
 
     public int getValue() {
@@ -50,6 +53,13 @@ public enum CoCoResultType {
      */
     public String getTypeDescription() {
         return LocalizationService.getInstance().getMessage(descriptionKey);
+    }
+
+    /**
+     * @return returns a description for the result type
+     */
+    public CoCoAttestationDataCreator getAttestationDataCreator() {
+        return attestationDataCreator;
     }
 
     /**

@@ -49,8 +49,6 @@ import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestData;
 import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestDataCarlo;
 import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestDataCarlo2;
 import com.suse.manager.webui.utils.salt.custom.CoCoSecureBootAttestationRequestData;
-import com.suse.salt.netapi.results.CmdResult;
-import com.suse.salt.netapi.results.StateApplyResult;
 import com.suse.utils.Json;
 
 import com.google.gson.JsonElement;
@@ -61,7 +59,10 @@ import org.jmock.imposters.ByteBuddyClassImposteriser;
 import org.jmock.lib.concurrent.Synchroniser;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 
+import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -717,4 +718,76 @@ public class AttestationManagerTest extends JMockBaseTestCaseWithUser {
 
         return taskomaticApi;
     }
+
+    @ParameterizedTest
+    @EnumSource(value = CoCoEnvironmentType.class, names = {"KVM_AMD_EPYC_MILAN", "KVM_AMD_EPYC_GENOA",
+            "KVM_AMD_EPYC_BERGAMO", "KVM_AMD_EPYC_SIENA", "KVM_AMD_EPYC_TURIN"})
+    public void testInputDataGenerationAmd(CoCoEnvironmentType coCoEnvironmentType) throws TaskomaticApiException {
+        MinionServer minion = MinionServerFactoryTest.createTestMinionServer(user);
+        mgr.createConfig(user, minion, coCoEnvironmentType, true);
+        Date now = new Date();
+        CoCoAttestationAction action = mgr.scheduleAttestationAction(user, minion, now);
+        assertNotNull(action);
+
+        AttestationFactory f = new AttestationFactory();
+        Optional<ServerCoCoAttestationReport> latestReport = f.lookupLatestReportByServer(minion);
+        assertTrue(latestReport.isPresent());
+        Map<String, Object> inData = latestReport.get().getInData();
+
+        assertNotNull(inData);
+        assertEquals(1, inData.size()); //only the nonce
+
+        assertTrue(inData.containsKey("nonce"));
+        String nonceReport = (String) inData.getOrDefault("nonce", "");
+        byte[] decodedNonce = Base64.getDecoder().decode(nonceReport);
+        assertEquals(64, decodedNonce.length);
+
+        Pillar pillar = minion.getPillarByCategory(MinionGeneralPillarGenerator.CATEGORY).orElse(new Pillar());
+        Map<String, Object> attestationData = (Map<String, Object>) pillar.getPillar()
+                .getOrDefault("attestation_data", new HashMap<>());
+
+        assertEquals(coCoEnvironmentType.name(), attestationData.getOrDefault("environment_type", ""));
+
+        String noncePillar = (String) attestationData.getOrDefault("nonce", "");
+        assertEquals(nonceReport, noncePillar);
+    }
+
+    @Test
+    public void testInputDataGenerationIbm() throws TaskomaticApiException {
+        MinionServer minion = MinionServerFactoryTest.createTestMinionServer(user);
+        mgr.createConfig(user, minion, CoCoEnvironmentType.KVM_IBM_Z, true);
+        Date now = new Date();
+        CoCoAttestationAction action = mgr.scheduleAttestationAction(user, minion, now);
+        assertNotNull(action);
+
+        AttestationFactory f = new AttestationFactory();
+        Optional<ServerCoCoAttestationReport> latestReport = f.lookupLatestReportByServer(minion);
+        assertTrue(latestReport.isPresent());
+        Map<String, Object> inData = latestReport.get().getInData();
+
+        assertNotNull(inData);
+        assertEquals(2, inData.size());
+
+        assertTrue(inData.containsKey("nonce"));
+        String nonceReport = (String) inData.getOrDefault("nonce", "");
+        byte[] decodedNonce = Base64.getDecoder().decode(nonceReport);
+        assertEquals(256, decodedNonce.length);
+
+        assertTrue(inData.containsKey("attestation_request"));
+        String attestationRequest = (String) inData.getOrDefault("attestation_request", "");
+        assertTrue(attestationRequest.length() > 500);
+
+        Pillar pillar = minion.getPillarByCategory(MinionGeneralPillarGenerator.CATEGORY).orElse(new Pillar());
+        Map<String, Object> attestationData = (Map<String, Object>) pillar.getPillar()
+                .getOrDefault("attestation_data", new HashMap<>());
+
+        assertEquals("KVM_IBM_Z", attestationData.getOrDefault("environment_type", ""));
+
+        String noncePillar = (String) attestationData.getOrDefault("nonce", "");
+        assertEquals(nonceReport, noncePillar);
+
+        String attestationRequestPillar = (String) attestationData.getOrDefault("attestation_request", "");
+        assertEquals(attestationRequest, attestationRequestPillar);
+    }
+
 }
