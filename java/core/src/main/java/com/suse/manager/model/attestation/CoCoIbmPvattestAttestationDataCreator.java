@@ -10,6 +10,7 @@
  */
 package com.suse.manager.model.attestation;
 
+import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,8 +24,7 @@ public class CoCoIbmPvattestAttestationDataCreator extends CoCoAttestationDataCr
 
         //get attestation request from config (base 64 of binary file)
         String attestationRequestDemo = config.toString() + "a".repeat(500);
-
-        outMap.put(ATTESTATION_REQUEST_TAG, attestationRequestDemo);
+        outMap.put(ATTESTATION_REQUEST_TAG, Base64.getEncoder().encodeToString(attestationRequestDemo.getBytes()));
 
         return outMap;
     }

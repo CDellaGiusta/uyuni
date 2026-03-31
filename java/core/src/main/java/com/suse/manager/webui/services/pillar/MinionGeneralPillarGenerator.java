@@ -122,6 +122,11 @@ public class MinionGeneralPillarGenerator extends MinionPillarGeneratorBase {
                     .map(r -> new HashMap<>(r.getInData()))
                     .orElse(new HashMap<>());
             attestationPillar.put("environment_type", cnf.getEnvironmentType().name());
+
+            List<String> resultTypes = cnf.getEnvironmentType().getSupportedResultTypes()
+                    .stream().map(Enum::name).toList();
+            attestationPillar.put("result_types", resultTypes);
+
             pillar.add("attestation_data", attestationPillar);
         });
         return Optional.of(pillar);

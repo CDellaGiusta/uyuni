@@ -16,14 +16,12 @@
 package com.suse.manager.webui.utils.gson;
 
 import com.suse.manager.model.attestation.CoCoEnvironmentType;
-import com.suse.manager.model.attestation.CoCoResultType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 public class CoCoSettingsJson {
     private final boolean supported;
@@ -108,7 +106,7 @@ public class CoCoSettingsJson {
     public static final String HKD_TAG = "host_key_document";
     public static final String SEH_TAG = "secure_extension_header";
 
-    public Map<String, Object> getDataIn() {
+    public Map<String, Object> getInData() {
         Map<String, Object> dataInMap = new HashMap<>();
 
         if (null != hostKeyDocument) {

@@ -65,7 +65,6 @@ import com.suse.manager.model.products.migration.MigrationScheduleRequest;
 import com.suse.manager.reactor.utils.LocalDateTimeISOAdapter;
 import com.suse.manager.reactor.utils.OptionalTypeAdapterFactory;
 import com.suse.manager.utils.SaltKeyUtils;
-import com.suse.manager.webui.controllers.admin.beans.HubRegisterRequest;
 import com.suse.manager.webui.controllers.bootstrap.RegularMinionBootstrapper;
 import com.suse.manager.webui.controllers.bootstrap.SSHMinionBootstrapper;
 import com.suse.manager.webui.controllers.utils.ContactMethodUtil;
@@ -101,7 +100,6 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -753,39 +751,15 @@ public class MinionsAPI {
         }
     }
 
-    //TODO: DUPLICATE IN SYSTEM HANDLER
     private ServerCoCoAttestationConfig updateServerCoCoConfiguration(User user, Server server,
                                                                       CoCoSettingsJson jsonConfig) {
-        CoCoAttestationStatus initialStatus = CoCoAttestationStatus.SUCCEEDED;
 
-        return attestationManager.getConfig(user, server)
-            .map(cfg -> {
-                cfg.setEnabled(jsonConfig.isEnabled());
-                cfg.setEnvironmentType(jsonConfig.getEnvironmentType());
-                cfg.setAttestOnBoot(jsonConfig.isAttestOnBoot());
-                cfg.setInData(jsonConfig.getDataIn());
-                cfg.setStatus(initialStatus);
-
-                attestationManager.saveConfig(user, cfg);
-
-                return cfg;
-            })
-            .orElseGet(() -> attestationManager.createConfig(user, server,
-                jsonConfig.getEnvironmentType(),
+        return attestationManager.setCoCoAttestationConfig(user, server,
                 jsonConfig.isEnabled(),
+                jsonConfig.getEnvironmentType(),
                 jsonConfig.isAttestOnBoot(),
-                jsonConfig.getDataIn(),
-                initialStatus
-            ));
+                jsonConfig.getInData());
     }
-
-    // Map<String, Object> attestationData = config.getEnvironmentType().getSupportedResultTypes().stream()
-    //                .map(CoCoResultType::getAttestationDataCreator)
-    //                .map(adc -> adc.buildAttestationInputData(config))
-    //                .flatMap(map -> map.entrySet().stream())
-    //                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    //
-    //        initReport.setInData(attestationData);
 
     private String scheduleAllCoCoAttestation(Request request, Response response, User user) {
         SystemScheduledRequestJson scheduleRequest = GSON.fromJson(request.body(), SystemScheduledRequestJson.class);

@@ -26,6 +26,8 @@ import com.redhat.rhn.domain.server.MinionServer;
 import com.redhat.rhn.domain.server.Server;
 import com.redhat.rhn.domain.user.User;
 import com.redhat.rhn.frontend.listview.PageControl;
+import com.redhat.rhn.frontend.xmlrpc.NoSuchSystemException;
+import com.redhat.rhn.frontend.xmlrpc.UnsupportedOperationException;
 import com.redhat.rhn.manager.system.SystemManager;
 import com.redhat.rhn.taskomatic.TaskomaticApi;
 import com.redhat.rhn.taskomatic.TaskomaticApiException;
@@ -38,6 +40,7 @@ import com.suse.manager.model.attestation.CoCoResultType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
 import com.suse.manager.webui.services.pillar.MinionPillarManager;
+import com.suse.manager.webui.utils.gson.CoCoSettingsJson;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -447,4 +450,32 @@ public class AttestationManager {
         }
     }
 
+    public ServerCoCoAttestationConfig setCoCoAttestationConfig(User user, Server server,
+                                                                boolean isEnabled,
+                                                                CoCoEnvironmentType environmentType,
+                                                                boolean attestOnBoot,
+                                                                Map<String, Object> inData) {
+
+        CoCoAttestationStatus initialStatus = CoCoAttestationStatus.SUCCEEDED;
+
+        return getConfig(user, server)
+                .map(cfg -> {
+                    cfg.setEnabled(isEnabled);
+                    cfg.setEnvironmentType(environmentType);
+                    cfg.setAttestOnBoot(attestOnBoot);
+                    cfg.setInData(inData);
+                    cfg.setStatus(initialStatus);
+
+                    saveConfig(user, cfg);
+
+                    return cfg;
+                })
+                .orElseGet(() -> createConfig(user, server,
+                        environmentType,
+                        isEnabled,
+                        attestOnBoot,
+                        inData,
+                        initialStatus
+                ));
+    }
 }
