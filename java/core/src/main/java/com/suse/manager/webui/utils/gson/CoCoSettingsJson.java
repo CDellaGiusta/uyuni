@@ -16,10 +16,14 @@
 package com.suse.manager.webui.utils.gson;
 
 import com.suse.manager.model.attestation.CoCoEnvironmentType;
+import com.suse.manager.model.attestation.CoCoResultType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 public class CoCoSettingsJson {
     private final boolean supported;
@@ -29,6 +33,27 @@ public class CoCoSettingsJson {
     private final CoCoEnvironmentType environmentType;
 
     private final boolean attestOnBoot;
+
+    //IBM specific
+    private String hostKeyDocument;
+
+    public String getHostKeyDocument() {
+        return hostKeyDocument;
+    }
+
+    public void setHostKeyDocument(String hostKeyDocumentIn) {
+        hostKeyDocument = hostKeyDocumentIn;
+    }
+
+    private String secureExtensionHeader;
+
+    public String getSecureExtensionHeader() {
+        return secureExtensionHeader;
+    }
+
+    public void setSecureExtensionHeader(String secureExtensionHeaderIn) {
+        secureExtensionHeader = secureExtensionHeaderIn;
+    }
 
     /**
      * Builds a json configuration from an existing attestation config
@@ -60,6 +85,8 @@ public class CoCoSettingsJson {
         this.enabled = enabledIn;
         this.environmentType = environmentTypeIn;
         this.attestOnBoot = attestOnBootIn;
+        this.hostKeyDocument = null;
+        this.secureExtensionHeader = null;
     }
 
     public boolean isSupported() {
@@ -78,6 +105,22 @@ public class CoCoSettingsJson {
         return attestOnBoot;
     }
 
+    public static final String HKD_TAG = "host_key_document";
+    public static final String SEH_TAG = "secure_extension_header";
+
+    public Map<String, Object> getDataIn() {
+        Map<String, Object> dataInMap = new HashMap<>();
+
+        if (null != hostKeyDocument) {
+            dataInMap.put(HKD_TAG, hostKeyDocument);
+        }
+        if (null != secureExtensionHeader) {
+            dataInMap.put(SEH_TAG, secureExtensionHeader);
+        }
+
+        return dataInMap;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {
@@ -89,12 +132,15 @@ public class CoCoSettingsJson {
         return supported == that.supported &&
             enabled == that.enabled &&
             attestOnBoot == that.attestOnBoot &&
-            environmentType == that.environmentType;
+            environmentType == that.environmentType &&
+            hostKeyDocument.equals(that.hostKeyDocument) &&
+            secureExtensionHeader.equals(that.secureExtensionHeader);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(supported, enabled, environmentType, attestOnBoot);
+        return Objects.hash(supported, enabled, environmentType, attestOnBoot,
+                hostKeyDocument, secureExtensionHeader);
     }
 
     @Override
@@ -104,6 +150,9 @@ public class CoCoSettingsJson {
             .add("enabled=" + isEnabled())
             .add("environmentType=" + getEnvironmentType())
             .add("attestOnBoot=" + isAttestOnBoot())
+            .add("hostKeyDocument=" + getHostKeyDocument())
+            .add("secureExtensionHeader=" + getSecureExtensionHeader())
+
             .toString();
     }
 }

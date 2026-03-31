@@ -25,7 +25,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class AttestationFactory extends HibernateFactory {
@@ -134,7 +136,8 @@ public class AttestationFactory extends HibernateFactory {
      */
     public ServerCoCoAttestationConfig createConfigForServer(Server serverIn, CoCoEnvironmentType typeIn,
                                                              boolean enabledIn) {
-        return createConfigForServer(serverIn, typeIn, enabledIn, false);
+        return createConfigForServer(serverIn, typeIn, enabledIn, false, new HashMap<>(),
+                CoCoAttestationStatus.SUCCEEDED);
     }
 
     /**
@@ -147,9 +150,31 @@ public class AttestationFactory extends HibernateFactory {
      */
     public ServerCoCoAttestationConfig createConfigForServer(Server serverIn, CoCoEnvironmentType typeIn,
                                                              boolean enabledIn, boolean attestOnBootIn) {
+        return createConfigForServer(serverIn, typeIn, enabledIn, attestOnBootIn, new HashMap<>(),
+                CoCoAttestationStatus.SUCCEEDED);
+    }
+
+
+    /**
+     * Create a Confidential Compute Attestation Config for a given Server ID
+     * @param serverIn the server
+     * @param typeIn the environment type
+     * @param enabledIn enabled status
+     * @param attestOnBootIn perform attestation on boot
+     * @param inDataIn dummy
+     * @param statusIn dummy
+     * @return returns the Confidential Compute Attestation Config
+     */
+    public ServerCoCoAttestationConfig createConfigForServer(Server serverIn, CoCoEnvironmentType typeIn,
+                                                             boolean enabledIn, boolean attestOnBootIn,
+                                                             Map<String, Object> inDataIn,
+                                                             CoCoAttestationStatus statusIn) {
         ServerCoCoAttestationConfig cnf = new ServerCoCoAttestationConfig(enabledIn, serverIn);
         cnf.setEnvironmentType(typeIn);
         cnf.setAttestOnBoot(attestOnBootIn);
+        cnf.setInData(inDataIn);
+        cnf.setStatus(statusIn);
+
         save(cnf);
         serverIn.setCocoAttestationConfig(cnf);
         return cnf;

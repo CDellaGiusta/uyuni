@@ -14,12 +14,18 @@ import com.redhat.rhn.domain.server.Server;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.Type;
 
 import java.io.Serializable;
+import java.util.Map;
+import java.util.TreeMap;
 
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,6 +42,64 @@ public class ServerCoCoAttestationConfig implements Serializable  {
     private boolean enabled;
     private CoCoEnvironmentType environmentType;
     private boolean attestOnBoot;
+
+    private CoCoAttestationStatus status;
+    private Map<String, Object> inData = new TreeMap<>();
+    private Map<String, Object> outData = new TreeMap<>();
+
+    @Column(name = "status")
+    @Enumerated(EnumType.STRING)
+    public CoCoAttestationStatus getStatus() {
+        return status;
+    }
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb", name = "in_data")
+    public Map<String, Object> getInData() {
+        return inData;
+    }
+
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb", name = "out_data")
+    public Map<String, Object> getOutData() {
+        return outData;
+    }
+
+    /**
+     * @param statusIn the status to set
+     */
+    public void setStatus(CoCoAttestationStatus statusIn) {
+        status = statusIn;
+    }
+
+    /**
+     * @param inDataIn the input data to set
+     */
+    public void setInData(Map<String, Object> inDataIn) {
+        inData = inDataIn;
+    }
+
+    /**
+     * @param outDataIn the output data to set
+     */
+    public void setOutData(Map<String, Object> outDataIn) {
+        outData = outDataIn;
+    }
+
+//    //
+//    ALTER TABLE suseServerCoCoAttestationConfig
+//    ADD COLUMN status character varying(32) COLLATE pg_catalog."default" NOT NULL;
+//
+//    ALTER TABLE suseServerCoCoAttestationConfig
+//    ADD COLUMN in_data jsonb NOT NULL;
+//
+//    ALTER TABLE suseServerCoCoAttestationConfig
+//    ADD COLUMN out_data jsonb NOT NULL;
+//
+//    ALTER TABLE suseServerCoCoAttestationConfig
+//    ADD CONSTRAINT suse_srvcocoatt_conf_st_ck CHECK (status::text = ANY (ARRAY['PENDING'::character varying, 'SUCCEEDED'::character varying, 'FAILED'::character varying]::text[]))
+
+
 
     // Default empty constructor for hibernate
     protected ServerCoCoAttestationConfig() {
@@ -142,6 +206,9 @@ public class ServerCoCoAttestationConfig implements Serializable  {
         }
         ServerCoCoAttestationConfig that = (ServerCoCoAttestationConfig) o;
         return new EqualsBuilder()
+                .append(outData, that.outData)
+                .append(inData, that.inData)
+                .append(status, that.status)
                 .append(enabled, that.enabled)
                 .append(environmentType, that.environmentType)
                 .append(server, that.server)
@@ -154,6 +221,9 @@ public class ServerCoCoAttestationConfig implements Serializable  {
                 .append(server)
                 .append(enabled)
                 .append(environmentType)
+                .append(outData)
+                .append(inData)
+                .append(status)
                 .toHashCode();
     }
 
@@ -163,6 +233,7 @@ public class ServerCoCoAttestationConfig implements Serializable  {
                 "server=" + server +
                 ", enabled=" + enabled +
                 ", environmentType=" + environmentType +
+                ", status=" + status +
                 '}';
     }
 }

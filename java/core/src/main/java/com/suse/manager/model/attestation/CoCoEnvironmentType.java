@@ -80,10 +80,11 @@ public enum CoCoEnvironmentType {
         return Stream.of(CoCoEnvironmentType.values()).filter(e -> e != NONE).toList();
     }
 
-    /**
-     * @return returns if a nonce value is required
-     */
-    public boolean isNonceRequired() {
-        return (NONE != this);
+
+    public boolean isHostKeyDocumentRequired() {
+        return (KVM_IBM_Z == this);
+    }
+    public boolean isSecureExtensionHeaderRequired() {
+        return (KVM_IBM_Z == this);
     }
 }

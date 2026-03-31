@@ -32,6 +32,7 @@ import com.redhat.rhn.taskomatic.TaskomaticApiException;
 
 import com.suse.manager.model.attestation.AttestationFactory;
 import com.suse.manager.model.attestation.CoCoAttestationResult;
+import com.suse.manager.model.attestation.CoCoAttestationStatus;
 import com.suse.manager.model.attestation.CoCoEnvironmentType;
 import com.suse.manager.model.attestation.CoCoResultType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
@@ -43,6 +44,7 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -212,8 +214,25 @@ public class AttestationManager {
      */
     public ServerCoCoAttestationConfig createConfig(User userIn, Server serverIn, CoCoEnvironmentType typeIn,
                                                     boolean enabledIn) {
-        return createConfig(userIn, serverIn, typeIn, enabledIn, false);
+        return createConfig(userIn, serverIn, typeIn, enabledIn, false, new HashMap<>(),
+                CoCoAttestationStatus.SUCCEEDED);
     }
+    /**
+     * Create a Attestation configuration for a given server
+     * @param userIn the user
+     * @param serverIn the server
+     * @param typeIn the environment type
+     * @param enabledIn should the config been enabled
+     * @param attestOnBootIn should the attestation be performed on system boot
+     * @return returns the configuration
+     */
+    public ServerCoCoAttestationConfig createConfig(User userIn, Server serverIn, CoCoEnvironmentType typeIn,
+                                                    boolean enabledIn, boolean attestOnBootIn) {
+        ensureSystemAccessible(userIn, serverIn);
+        return factory.createConfigForServer(serverIn, typeIn, enabledIn, attestOnBootIn, new HashMap<>(),
+                CoCoAttestationStatus.SUCCEEDED);
+    }
+
         /**
          * Create a Attestation configuration for a given server
          * @param userIn the user
@@ -221,12 +240,15 @@ public class AttestationManager {
          * @param typeIn the environment type
          * @param enabledIn should the config been enabled
          * @param attestOnBootIn should the attestation be performed on system boot
+         * @param inDataIn dummy
+         * @param statusIn dummy
          * @return returns the configuration
          */
     public ServerCoCoAttestationConfig createConfig(User userIn, Server serverIn, CoCoEnvironmentType typeIn,
-                                                    boolean enabledIn, boolean attestOnBootIn) {
+                                                    boolean enabledIn, boolean attestOnBootIn,
+                                                    Map<String, Object> inDataIn, CoCoAttestationStatus statusIn) {
         ensureSystemAccessible(userIn, serverIn);
-        return factory.createConfigForServer(serverIn, typeIn, enabledIn, attestOnBootIn);
+        return factory.createConfigForServer(serverIn, typeIn, enabledIn, attestOnBootIn, inDataIn, statusIn);
     }
 
 

@@ -56,6 +56,8 @@ import com.redhat.rhn.taskomatic.TaskomaticApiException;
 
 import com.suse.cloud.CloudPaygManager;
 import com.suse.manager.attestation.AttestationManager;
+import com.suse.manager.model.attestation.CoCoAttestationStatus;
+import com.suse.manager.model.attestation.CoCoEnvironmentType;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 import com.suse.manager.model.products.migration.MigrationChannelsRequest;
 import com.suse.manager.model.products.migration.MigrationDataFactory;
@@ -63,6 +65,7 @@ import com.suse.manager.model.products.migration.MigrationScheduleRequest;
 import com.suse.manager.reactor.utils.LocalDateTimeISOAdapter;
 import com.suse.manager.reactor.utils.OptionalTypeAdapterFactory;
 import com.suse.manager.utils.SaltKeyUtils;
+import com.suse.manager.webui.controllers.admin.beans.HubRegisterRequest;
 import com.suse.manager.webui.controllers.bootstrap.RegularMinionBootstrapper;
 import com.suse.manager.webui.controllers.bootstrap.SSHMinionBootstrapper;
 import com.suse.manager.webui.controllers.utils.ContactMethodUtil;
@@ -90,6 +93,7 @@ import com.suse.utils.gson.RecordTypeAdapterFactory;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.TypeAdapter;
 import com.google.gson.reflect.TypeToken;
 import com.google.gson.stream.JsonReader;
@@ -97,6 +101,7 @@ import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
 
 import org.apache.commons.collections.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -639,7 +644,17 @@ public class MinionsAPI {
                     LOCAL.getMessage("system.audit.coco.unsupported")), new TypeToken<>() { });
         }
 
-        CoCoSettingsJson jsonConfig = GSON.fromJson(request.body(), CoCoSettingsJson.class);
+        //CoCoSettingsJson jsonConfig = GSON.fromJson(request.body(), CoCoSettingsJson.class);
+        CoCoSettingsJson jsonConfig;
+        try {
+            jsonConfig = validateCoCoSettings(GSON.fromJson(request.body(), CoCoSettingsJson.class));
+        }
+        catch (JsonSyntaxException ex) {
+            LOG.error("Unable to parse JSON request {}", request, ex);
+            //return badRequest(response, LOCAL.getMessage("system.audit.coco.invalid_request"));
+            return badRequest(response, "coco settings invalid request:" + ex.getMessage());
+        }
+
         try {
             ServerCoCoAttestationConfig updatedConfig = updateServerCoCoConfiguration(user, server, jsonConfig);
 
@@ -651,6 +666,29 @@ public class MinionsAPI {
                 new TypeToken<>() { });
         }
     }
+
+
+    private static CoCoSettingsJson validateCoCoSettings(CoCoSettingsJson parsedRequest) {
+        //hack to be removed: insert data
+        parsedRequest.setHostKeyDocument("host key document certificate");
+        parsedRequest.setSecureExtensionHeader("secure extension header");
+        //end of hack to be removed
+
+        CoCoEnvironmentType envType = parsedRequest.getEnvironmentType();
+
+        boolean missingHostKeyDocument = parsedRequest.getHostKeyDocument() == null;
+        if (envType.isHostKeyDocumentRequired() && missingHostKeyDocument) {
+            throw new JsonSyntaxException("Missing required host key document certificate in the request");
+        }
+
+        boolean missingSecureExtensionHeader = parsedRequest.getSecureExtensionHeader() == null;
+        if (envType.isSecureExtensionHeaderRequired() && missingSecureExtensionHeader) {
+            throw new JsonSyntaxException("Missing required secure extension header in the request");
+        }
+
+        return parsedRequest;
+    }
+
 
     private String listAllAttestations(Request request, Response response, User user, Server server) {
         PageControlHelper pageHelper = new PageControlHelper(request);
@@ -715,13 +753,18 @@ public class MinionsAPI {
         }
     }
 
+    //TODO: DUPLICATE IN SYSTEM HANDLER
     private ServerCoCoAttestationConfig updateServerCoCoConfiguration(User user, Server server,
                                                                       CoCoSettingsJson jsonConfig) {
+        CoCoAttestationStatus initialStatus = CoCoAttestationStatus.SUCCEEDED;
+
         return attestationManager.getConfig(user, server)
             .map(cfg -> {
                 cfg.setEnabled(jsonConfig.isEnabled());
                 cfg.setEnvironmentType(jsonConfig.getEnvironmentType());
                 cfg.setAttestOnBoot(jsonConfig.isAttestOnBoot());
+                cfg.setInData(jsonConfig.getDataIn());
+                cfg.setStatus(initialStatus);
 
                 attestationManager.saveConfig(user, cfg);
 
@@ -730,9 +773,19 @@ public class MinionsAPI {
             .orElseGet(() -> attestationManager.createConfig(user, server,
                 jsonConfig.getEnvironmentType(),
                 jsonConfig.isEnabled(),
-                jsonConfig.isAttestOnBoot()
+                jsonConfig.isAttestOnBoot(),
+                jsonConfig.getDataIn(),
+                initialStatus
             ));
     }
+
+    // Map<String, Object> attestationData = config.getEnvironmentType().getSupportedResultTypes().stream()
+    //                .map(CoCoResultType::getAttestationDataCreator)
+    //                .map(adc -> adc.buildAttestationInputData(config))
+    //                .flatMap(map -> map.entrySet().stream())
+    //                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+    //
+    //        initReport.setInData(attestationData);
 
     private String scheduleAllCoCoAttestation(Request request, Response response, User user) {
         SystemScheduledRequestJson scheduleRequest = GSON.fromJson(request.body(), SystemScheduledRequestJson.class);
