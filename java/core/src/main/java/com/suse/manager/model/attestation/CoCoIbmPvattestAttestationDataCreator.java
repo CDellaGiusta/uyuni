@@ -10,11 +10,16 @@
  */
 package com.suse.manager.model.attestation;
 
+import com.suse.manager.webui.utils.gson.CoCoSettingsJson;
+
 import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
 public class CoCoIbmPvattestAttestationDataCreator extends CoCoAttestationDataCreator {
+
+    private String attestationRequestBin = "";
+    private String attestationProtectionKeyBin = "";
 
     @Override
     public Map<String, Object> buildAttestationInputData(ServerCoCoAttestationConfig config) {
@@ -23,9 +28,29 @@ public class CoCoIbmPvattestAttestationDataCreator extends CoCoAttestationDataCr
         outMap.put(NONCE_TAG, createBase64EncodedRandomNonce(256));
 
         //get attestation request from config (base 64 of binary file)
-        String attestationRequestDemo = config.toString() + "a".repeat(500);
-        outMap.put(ATTESTATION_REQUEST_TAG, Base64.getEncoder().encodeToString(attestationRequestDemo.getBytes()));
+        Map<String, Object> inData = config.getInData();
+        String hostKeyDocument = CoCoSettingsJson.extractHostKeyDocument(inData);
+        //String secureExtensionHeader = CoCoSettingsJson.extractSecureExtensionHeader(inData);
+
+        createAttestationRequest(hostKeyDocument);
+        outMap.put(ATTESTATION_REQUEST_TAG, Base64.getEncoder().encodeToString(attestationRequestBin.getBytes()));
+        outMap.put(ATTESTATION_PROTECTION_KEY_TAG, Base64.getEncoder().encodeToString(attestationProtectionKeyBin.getBytes()));
 
         return outMap;
     }
+
+    protected void createAttestationRequest(String hostKeyDocument) {
+        attestationRequestBin = "pvattest create -v \n" +
+                "-k input/host_key_document.crt [" + hostKeyDocument + "]\n" +
+                "--no-verify \n" +
+                "-o output/attestation_request.bin\n" +
+                "-a output/attestation_protection_key.key \n" +
+                "--add-data phkh-img \n" +
+                "--add-data phkh-att" +
+                "a".repeat(500);
+
+        attestationProtectionKeyBin = "0123456789ABCDEF0123456789abcdef";
+    }
+
 }
+

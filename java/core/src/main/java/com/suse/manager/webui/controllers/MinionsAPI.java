@@ -667,12 +667,14 @@ public class MinionsAPI {
 
 
     private static CoCoSettingsJson validateCoCoSettings(CoCoSettingsJson parsedRequest) {
-        //hack to be removed: insert data
-        parsedRequest.setHostKeyDocument("host key document certificate");
-        parsedRequest.setSecureExtensionHeader("secure extension header");
-        //end of hack to be removed
-
         CoCoEnvironmentType envType = parsedRequest.getEnvironmentType();
+
+        //CARLO_HACK hack to be removed: insert data
+        if (CoCoEnvironmentType.KVM_IBM_Z == envType) {
+            parsedRequest.setHostKeyDocument("host key document certificate");
+            parsedRequest.setSecureExtensionHeader("secure extension header");
+        }
+        //CARLO_HACK end of hack to be removed
 
         boolean missingHostKeyDocument = parsedRequest.getHostKeyDocument() == null;
         if (envType.isHostKeyDocumentRequired() && missingHostKeyDocument) {

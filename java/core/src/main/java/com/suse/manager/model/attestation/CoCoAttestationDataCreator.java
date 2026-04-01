@@ -20,6 +20,7 @@ public class CoCoAttestationDataCreator {
 
     public static final String NONCE_TAG = "nonce";
     public static final String ATTESTATION_REQUEST_TAG = "attestation_request";
+    public static final String ATTESTATION_PROTECTION_KEY_TAG = "attestation_protection_key";
 
     /**
      * @param config dummy

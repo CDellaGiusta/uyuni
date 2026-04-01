@@ -20,7 +20,9 @@ import com.suse.manager.model.attestation.CoCoAttestationStatus;
 import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
 import com.suse.manager.utils.SaltUtils;
 import com.suse.manager.webui.services.SaltParameters;
+import com.suse.manager.webui.utils.salt.custom.ChecksumAdapter;
 import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestData;
+import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestDataCarlo2;
 import com.suse.salt.netapi.calls.LocalCall;
 import com.suse.salt.netapi.calls.modules.State;
 import com.suse.utils.Json;
@@ -133,9 +135,15 @@ public class CoCoAttestationAction extends Action {
 
             //jsonResult.getAsJsonObject().get("")
 
-            CoCoAttestationRequestData requestData = Json.GSON.fromJson(jsonResult, CoCoAttestationRequestData.class);
-            report.setOutData(requestData.asMap());
+            CoCoAttestationRequestDataCarlo2 requestDataCarlo2 = new CoCoAttestationRequestDataCarlo2();
+            requestDataCarlo2.parse(jsonResult);
+            report.setOutData(requestDataCarlo2.asMap());
             mgr.initializeResults(report);
+
+
+//            CoCoAttestationRequestData requestData = Json.GSON.fromJson(jsonResult, CoCoAttestationRequestData.class);
+//            report.setOutData(requestData.asMap());
+//            mgr.initializeResults(report);
         }
         catch (JsonSyntaxException e) {
             String msg = "Failed to parse the attestation result:\n";

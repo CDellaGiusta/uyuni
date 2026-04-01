@@ -39,6 +39,7 @@ public class CoCoAttestationRequestDataCarlo2 {
     public void parse(JsonElement jsonResult) {
         chunks.clear();
         chunks.add(Json.GSON.fromJson(jsonResult, CoCoAmdEpycAttestationRequestData.class));
+        chunks.add(Json.GSON.fromJson(jsonResult, CoCoIbmPvattestAttestationRequestData.class));
         chunks.add(Json.GSON.fromJson(jsonResult, CoCoSecureBootAttestationRequestData.class));
     }
 

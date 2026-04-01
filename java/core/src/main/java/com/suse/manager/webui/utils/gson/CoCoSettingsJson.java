@@ -119,6 +119,15 @@ public class CoCoSettingsJson {
         return dataInMap;
     }
 
+    public static String extractHostKeyDocument(Map<String, Object> inData) {
+        return (String) inData.getOrDefault(HKD_TAG, "");
+    }
+
+    public static String extractSecureExtensionHeader(Map<String, Object> inData) {
+        return (String) inData.getOrDefault(SEH_TAG, "");
+    }
+
+
     @Override
     public boolean equals(Object o) {
         if (this == o) {

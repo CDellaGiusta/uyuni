@@ -456,7 +456,15 @@ public class AttestationManager {
                                                                 boolean attestOnBoot,
                                                                 Map<String, Object> inData) {
 
-        CoCoAttestationStatus initialStatus = CoCoAttestationStatus.SUCCEEDED;
+        CoCoAttestationStatus initialStatus;
+        //CARLO_HACK hack to be removed: initial status pending if IBM
+        if (environmentType.isHostKeyDocumentRequired()) {
+            initialStatus = CoCoAttestationStatus.PENDING;
+        }
+        else {
+            initialStatus = CoCoAttestationStatus.SUCCEEDED;
+        }
+        //CARLO_HACK end of hack to be removed
 
         return getConfig(user, server)
                 .map(cfg -> {
