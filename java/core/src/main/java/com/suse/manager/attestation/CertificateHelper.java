@@ -11,27 +11,16 @@
 
 package com.suse.manager.attestation;
 
-import com.redhat.rhn.common.util.http.HttpClientAdapter;
-
-import com.suse.utils.CertificateUtils;
-
-import org.apache.commons.lang3.StringUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpRequestBase;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.NoRouteToHostException;
-import java.net.URI;
-import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.security.cert.CRLException;
-import java.security.cert.Certificate;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
@@ -39,7 +28,6 @@ import java.security.cert.CertificateParsingException;
 import java.security.cert.X509CRL;
 import java.security.cert.X509Certificate;
 import java.util.Base64;
-import java.util.Optional;
 
 public class CertificateHelper {
     private static final Logger LOGGER = LogManager.getLogger(CertificateHelper.class);
@@ -72,8 +60,17 @@ public class CertificateHelper {
     * @throws CertificateException  dummy
     */
     public static X509Certificate parse(String pemCertificate) throws CertificateException {
-        Optional<Certificate> cert = CertificateUtils.parse(pemCertificate);
-        return (X509Certificate) cert.orElseThrow();
+        if (pemCertificate == null || pemCertificate.isEmpty()) {
+            throw new CertificateException("empty or null PEM certificate");
+        }
+
+        try (InputStream inputStream = new ByteArrayInputStream(pemCertificate.getBytes(StandardCharsets.UTF_8))) {
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            return (X509Certificate) certificateFactory.generateCertificate(inputStream);
+        }
+        catch (IOException ex) {
+            throw new CertificateParsingException("Unable to load certificate from byte array", ex);
+        }
     }
 
     /**
@@ -97,11 +94,8 @@ public class CertificateHelper {
      * @throws CertificateException  dummy
      */
     public static X509CRL parseCertificateRevocationList(String pemCrlCertificate) throws CertificateException {
-        //Optional<Certificate> cert = CertificateUtils.parse(pemCrlCertificate);
-        Optional<X509CRL> crl = CertificateHelper.parseCrl(pemCrlCertificate);
-        return crl.orElseThrow();
+        return CertificateHelper.parseCrl(pemCrlCertificate);
     }
-
 
     /**
      * @param urlIn dummy
@@ -109,50 +103,10 @@ public class CertificateHelper {
      * @throws IOException dummy
      */
     private static String downloadStringContent(String urlIn) throws IOException {
-
-        URI certificateURI = null;
-        try {
-            certificateURI = new URI(urlIn);
-        }
-        catch (URISyntaxException ex) {
-            LOGGER.error("Unable to get content from url: {} {}.", urlIn, ex.getMessage());
-        }
-
-        HttpClientAdapter httpClient = new HttpClientAdapter(null, false);
-
-        HttpRequestBase request = new HttpGet(certificateURI);
-        try {
-            // Connect and parse the response on success
-            HttpResponse response = httpClient.executeRequest(request);
-            int responseCode = response.getStatusLine().getStatusCode();
-
-            if (responseCode == HttpStatus.SC_OK) {
-                try (InputStream inputStream = response.getEntity().getContent()) {
-                    return new String(inputStream.readAllBytes(), StandardCharsets.UTF_8);
-                }
-            }
-            else {
-                // Request was not successful
-                String errorString = "Unable to get content: response code " + responseCode +
-                        " connecting to " + request.getURI();
-                LOGGER.error(errorString);
-                throw new IOException(errorString);
-            }
-        }
-        catch (NoRouteToHostException ex) {
-            String errorString = "No route to download content";
-            LOGGER.error(errorString, ex);
-            throw new IOException(errorString);
-        }
-        catch (IOException ioEx) {
-            LOGGER.error("Unable to download content: {} {}", urlIn, ioEx);
-            throw ioEx;
-        }
-        finally {
-            request.releaseConnection();
+        try (BufferedInputStream in = new BufferedInputStream(new URL(urlIn).openStream())) {
+            return new String(in.readAllBytes(), StandardCharsets.UTF_8);
         }
     }
-
 
     /**
      * @param cert  dummy
@@ -179,32 +133,19 @@ public class CertificateHelper {
      * @return the certificate
      * @throws CertificateException when an error occurs while parsing the data
      */
-    public static Optional<X509CRL> parseCrl(String pemCrlCertificate) throws CertificateException {
-        if (StringUtils.isEmpty(pemCrlCertificate)) {
-            return Optional.empty();
+    public static X509CRL parseCrl(String pemCrlCertificate) throws CertificateException {
+        if (pemCrlCertificate == null || pemCrlCertificate.isEmpty()) {
+            throw new CertificateException("empty or null PEM CRL certificate");
         }
 
         try (InputStream inputStream = new ByteArrayInputStream(pemCrlCertificate.getBytes(StandardCharsets.UTF_8))) {
-            return parseCrl(inputStream);
+            CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
+            return (X509CRL)certificateFactory.generateCRL(inputStream);
         }
         catch (IOException | CRLException ex) {
             throw new CertificateParsingException("Unable to load certificate from byte array", ex);
         }
     }
 
-    /**
-     * Parse a given PEM certificate
-     * @param inputStream the input stream containing the PEM certificate
-     * @return the certificate
-     * @throws CertificateException when an error occurs while parsing the data
-     */
-    public static Optional<X509CRL> parseCrl(InputStream inputStream) throws CertificateException, CRLException {
-        if (inputStream == null) {
-            return Optional.empty();
-        }
-
-        CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
-        return Optional.of((X509CRL)certificateFactory.generateCRL(inputStream));
-    }
 
 }
