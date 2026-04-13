@@ -12,12 +12,16 @@ package com.suse.manager.model.attestation;
 
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
+import org.hibernate.annotations.Type;
 
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.Date;
+import java.util.Map;
 import java.util.Optional;
+import java.util.TreeMap;
 
+import io.hypersistence.utils.hibernate.type.json.JsonType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
@@ -40,7 +44,11 @@ public class CoCoAttestationResult implements Serializable {
 
     private Long id;
     private ServerCoCoAttestationReport report;
+    private Long actionId;
     private CoCoResultType resultType;
+    private CoCoEnvironmentType environmentType;
+    private Map<String, Object> inData = new TreeMap<>();
+    private Map<String, Object> outData = new TreeMap<>();
     private CoCoResultStatus status;
     private String description;
     private String details;
@@ -67,12 +75,47 @@ public class CoCoAttestationResult implements Serializable {
     }
 
     /**
+     * @return return the action id
+     */
+    @Column(name = "action_id")
+    public Long getActionId() {
+        return actionId;
+    }
+
+    /**
      * @return return the selected environment type
      */
     @Column(name = "result_type")
     @Convert(converter = CoCoResultTypeConverter.class)
     public CoCoResultType getResultType() {
         return resultType;
+    }
+
+    /**
+     * @return return the selected environment type
+     */
+    @Column(name = "env_type")
+    @Convert(converter = CoCoEnvironmentTypeConverter.class)
+    public CoCoEnvironmentType getEnvironmentType() {
+        return environmentType;
+    }
+
+    /**
+     * @return returns the in data
+     */
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb", name = "in_data")
+    public Map<String, Object> getInData() {
+        return inData;
+    }
+
+    /**
+     * @return returns the out data
+     */
+    @Type(JsonType.class)
+    @Column(columnDefinition = "jsonb", name = "out_data")
+    public Map<String, Object> getOutData() {
+        return outData;
     }
 
     /**
@@ -147,10 +190,38 @@ public class CoCoAttestationResult implements Serializable {
     }
 
     /**
+     * @param actionIdIn the action id to set
+     */
+    public void setActionId(Long actionIdIn) {
+        actionId = actionIdIn;
+    }
+
+    /**
      * @param resultTypeIn set the result type
      */
     public void setResultType(CoCoResultType resultTypeIn) {
         resultType = resultTypeIn;
+    }
+
+    /**
+     * @param environmentTypeIn set the environment type
+     */
+    public void setEnvironmentType(CoCoEnvironmentType environmentTypeIn) {
+        environmentType = environmentTypeIn;
+    }
+
+    /**
+     * @param inDataIn the input data to set
+     */
+    public void setInData(Map<String, Object> inDataIn) {
+        inData = inDataIn;
+    }
+
+    /**
+     * @param outDataIn the output data to set
+     */
+    public void setOutData(Map<String, Object> outDataIn) {
+        outData = outDataIn;
     }
 
     /**
@@ -174,6 +245,9 @@ public class CoCoAttestationResult implements Serializable {
         details = detailsIn;
     }
 
+    /**
+     * @param processOutputIn the process output to set
+     */
     public void setProcessOutput(String processOutputIn) {
         this.processOutput = processOutputIn;
     }
@@ -195,10 +269,13 @@ public class CoCoAttestationResult implements Serializable {
         }
         CoCoAttestationResult that = (CoCoAttestationResult) o;
         return new EqualsBuilder()
-                .append(description, that.description)
-                .append(status, that.status)
-                .append(resultType, that.resultType)
                 .append(report, that.report)
+                .append(resultType, that.resultType)
+                .append(environmentType, that.environmentType)
+                .append(status, that.status)
+                .append(description, that.description)
+                .append(inData, that.inData)
+                .append(outData, that.outData)
                 .isEquals();
     }
 
@@ -207,16 +284,21 @@ public class CoCoAttestationResult implements Serializable {
         return new HashCodeBuilder(17, 37)
                 .append(report)
                 .append(resultType)
-                .append(description)
+                .append(environmentType)
                 .append(status)
+                .append(description)
+                .append(inData)
+                .append(outData)
                 .toHashCode();
     }
 
     @Override
     public String toString() {
-        return "ServerCoCoAttestationReport{" +
+        return "CoCoAttestationResult{" +
                 "report_id=" + report.getId() +
+                ", action_id=" + actionId +
                 ", resultType=" + resultType +
+                ", environmentType=" + environmentType +
                 ", status=" + status +
                 ", description=" + description +
                 '}';
