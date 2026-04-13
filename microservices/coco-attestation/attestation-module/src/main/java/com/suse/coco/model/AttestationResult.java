@@ -22,6 +22,7 @@ public class AttestationResult {
     private long id;
     private long reportId;
     private int resultType;
+    private int envType;
     private AttestationStatus status;
     private String description;
     private String details;
@@ -50,6 +51,14 @@ public class AttestationResult {
 
     public void setResultType(int resultTypeIn) {
         this.resultType = resultTypeIn;
+    }
+
+    public int getEnvType() {
+        return envType;
+    }
+
+    public void setEnvType(int envTypeIn) {
+        this.envType = envTypeIn;
     }
 
     public AttestationStatus getStatus() {
@@ -114,6 +123,7 @@ public class AttestationResult {
             .add("id=" + id)
             .add("reportId=" + reportId)
             .add("resultType=" + resultType)
+            .add("envType=" + envType)
             .add("status='" + status + "'")
             .add("description='" + description + "'")
             .add("attested=" + attested)

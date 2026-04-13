@@ -26,6 +26,7 @@
           SELECT id
                     , report_id
                     , result_type
+                    , env_type
                     , status
                     , description
                     , details
