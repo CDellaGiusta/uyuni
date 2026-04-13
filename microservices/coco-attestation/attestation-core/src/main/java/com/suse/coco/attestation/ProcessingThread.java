@@ -11,6 +11,7 @@
 
 package com.suse.coco.attestation;
 
+import com.suse.coco.model.AttestationStatus;
 import com.suse.coco.module.AttestationModuleLoader;
 import com.suse.coco.module.AttestationWorker;
 
@@ -82,7 +83,7 @@ class ProcessingThread extends AbstractProcessorThread {
         try {
             while (!Thread.currentThread().isInterrupted() && listeningThread.isRunning()) {
                 // Load the pending attestation results of the supported types
-                List<Long> results = service.getPendingResultByType(moduleLoader.getSupportedResultTypes(), batchSize);
+                List<Long> results = service.getResultByStatusAndType(moduleLoader.getSupportedResultTypes(), batchSize);
                 if (results.isEmpty()) {
                     LOGGER.info("No attestation result to process - Waiting");
                     synchronized (dataAvailableLock) {
