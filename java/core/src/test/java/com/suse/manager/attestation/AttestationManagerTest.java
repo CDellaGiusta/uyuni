@@ -17,6 +17,7 @@ package com.suse.manager.attestation;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -53,7 +54,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -127,14 +127,13 @@ public class AttestationManagerTest extends JMockBaseTestCaseWithUser {
         Optional<ServerCoCoAttestationReport> latestReport = f.lookupLatestReportByServer(minion);
         Map<String, Object> inData = latestReport.orElse(new ServerCoCoAttestationReport()).getInData();
         assertNotNull(inData);
-        String nonceReport = (String) inData.getOrDefault("nonce", "not in report");
+        //no more data at this initial stage
+        assertEquals(0, inData.size());
+
         Pillar pillar = minion.getPillarByCategory(MinionGeneralPillarGenerator.CATEGORY).orElse(new Pillar());
-        Map<String, Object> attestationData = (Map<String, Object>) pillar.getPillar()
-                .getOrDefault("attestation_data", new HashMap<>());
-        String noncePillar = (String) attestationData.getOrDefault("nonce", "not in pillar");
-        assertEquals(nonceReport, noncePillar);
-        assertEquals("KVM_AMD_EPYC_GENOA",
-                attestationData.getOrDefault("environment_type", "environment_type not found"));
+        //no more pillars at this initial stage
+        assertNull(pillar.getPillar());
+
     }
 
     @Test
