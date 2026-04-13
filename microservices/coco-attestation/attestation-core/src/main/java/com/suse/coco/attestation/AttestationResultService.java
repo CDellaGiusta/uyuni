@@ -88,11 +88,11 @@ public class AttestationResultService {
             LOGGER.info("AttestationResult with id {} selected for processing", id);
 
             if(result.getStatus().isProcessingAttestationRequest()) {
-                success = worker.process(session, result);
+                success = worker.processAttestationVerification(session, result);
             }
 
             if(result.getStatus().isProcessingAttestationVerification()) {
-                success = worker.process(session, result);
+                success = worker.processAttestationVerification(session, result);
                 result.setAttested(success ? OffsetDateTime.now() : null);
             }
 

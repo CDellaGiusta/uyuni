@@ -11,7 +11,6 @@
 
 package com.suse.coco.attestation;
 
-import com.suse.coco.model.AttestationStatus;
 import com.suse.coco.module.AttestationModuleLoader;
 import com.suse.coco.module.AttestationWorker;
 
@@ -100,7 +99,7 @@ class ProcessingThread extends AbstractProcessorThread {
                     try {
                         service.processAttestationResult(resultId, (session, result) -> {
                             AttestationWorker worker = moduleLoader.createWorker(result.getResultType());
-                            return worker.process(session, result);
+                            return worker.processAttestationVerification(session, result);
                         });
                     }
                     catch (Exception ex) {
