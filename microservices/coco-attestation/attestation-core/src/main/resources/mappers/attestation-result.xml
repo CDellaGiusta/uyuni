@@ -27,6 +27,8 @@
                     , report_id
                     , result_type
                     , env_type
+                    , in_data
+                    , out_data
                     , status
                     , description
                     , details
@@ -41,6 +43,7 @@
           UPDATE suseCoCoAttestationResult
              SET status = #{status}
                     , details = #{details}
+                    , in_data = #{inData}::jsonb
                     , process_output = #{processOutput}
                 <if test="status.name() == 'SUCCEEDED'">
                     , attested = #{attested}
