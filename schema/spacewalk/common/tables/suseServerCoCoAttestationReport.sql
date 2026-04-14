@@ -19,13 +19,13 @@ CREATE TABLE suseServerCoCoAttestationReport
         action_id   NUMERIC     NULL
                       CONSTRAINT suse_srvcocoatt_rep_aid_fk REFERENCES rhnAction (id)
                       ON DELETE SET NULL,
-	env_type    NUMERIC     NOT NULL,
-	status      VARCHAR(32) NOT NULL
-	              CONSTRAINT suse_srvcocoatt_rep_st_ck
+        env_type    NUMERIC     NOT NULL,
+        status      VARCHAR(32) NOT NULL
+                        CONSTRAINT suse_srvcocoatt_rep_st_ck
                         CHECK(status IN ('PENDING', 'SUCCEEDED', 'FAILED')),
         in_data     JSONB NOT NULL, -- input data for the state.apply
         out_data    JSONB NOT NULL, -- output data from the state.apply
-	created     TIMESTAMPTZ DEFAULT (current_timestamp) NOT NULL,
+        created     TIMESTAMPTZ DEFAULT (current_timestamp) NOT NULL,
         modified    TIMESTAMPTZ DEFAULT (current_timestamp) NOT NULL
 );
 

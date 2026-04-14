@@ -37,3 +37,20 @@ AFTER INSERT OR UPDATE OF status ON suseCoCoAttestationResult
 FOR EACH ROW
 WHEN (NEW.status = 'PENDING')
 EXECUTE PROCEDURE suse_cocoatt_notify_pending_trig_fun();
+
+
+CREATE OR REPLACE FUNCTION suse_cocoatt_notify_requested_trig_fun() RETURNS TRIGGER AS
+$$
+BEGIN
+    NOTIFY pendingAttestationResult;
+    RETURN NEW;
+END;
+$$ language plpgsql;
+
+
+CREATE TRIGGER
+suse_cocoatt_notify_requested_trig
+AFTER INSERT OR UPDATE OF status ON suseCoCoAttestationResult
+FOR EACH ROW
+WHEN (NEW.status = 'REQUESTED')
+EXECUTE PROCEDURE suse_cocoatt_notify_requested_trig_fun();
