@@ -50,4 +50,12 @@
                 </if>
            WHERE id = #{id}
     </update>
+
+    <select id="retrieveConfigData" parameterType="Long" resultType="com.suse.coco.model.AttestationConfigData">
+        SELECT cfg.server_id, cfg.in_data
+        FROM suseServerCocoAttestationReport rpt
+        JOIN suseServerCocoAttestationConfig cfg ON rpt.server_id = cfg.server_id
+        WHERE rpt.id = #{reportId}
+    </select>
+
 </mapper>
