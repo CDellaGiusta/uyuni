@@ -209,12 +209,12 @@ public class AttestationFactory extends HibernateFactory {
      */
     public long countCoCoAttestationReportsForUser(User user) {
         return getSession()
-            .createQuery("SELECT COUNT(r.id) FROM UserImpl u " +
-                "JOIN u.servers s " +
-                "JOIN ServerCoCoAttestationReport r ON r.server = s " +
-                "WHERE u = :user", Long.class)
-            .setParameter("user", user)
-            .uniqueResult();
+                .createQuery("SELECT COUNT(r.id) FROM UserImpl u " +
+                        "JOIN u.servers s " +
+                        "JOIN ServerCoCoAttestationReport r ON r.server = s " +
+                        "WHERE u = :user", Long.class)
+                .setParameter("user", user)
+                .uniqueResult();
     }
 
     /**
@@ -224,9 +224,9 @@ public class AttestationFactory extends HibernateFactory {
      */
     public long countCoCoAttestationReportsForServer(Server serverIn) {
         return getSession()
-            .createQuery("SELECT COUNT(*) FROM ServerCoCoAttestationReport r WHERE r.server = :server", Long.class)
-            .setParameter("server", serverIn)
-            .uniqueResult();
+                .createQuery("SELECT COUNT(*) FROM ServerCoCoAttestationReport r WHERE r.server = :server", Long.class)
+                .setParameter("server", serverIn)
+                .uniqueResult();
     }
 
     /**
@@ -280,14 +280,43 @@ public class AttestationFactory extends HibernateFactory {
      */
     public List<ServerCoCoAttestationReport> listCoCoAttestationReportsForUser(User user, int offsetIn, int limitIn) {
         return getSession()
-            .createQuery("SELECT r FROM UserImpl u " +
-                "JOIN u.servers s " +
-                "JOIN ServerCoCoAttestationReport r ON r.server = s " +
-                "WHERE u = :user " +
-                "ORDER BY r.created DESC", ServerCoCoAttestationReport.class)
-            .setParameter("user", user)
-            .setMaxResults(limitIn)
-            .setFirstResult(offsetIn)
-            .list();
+                .createQuery("SELECT r FROM UserImpl u " +
+                        "JOIN u.servers s " +
+                        "JOIN ServerCoCoAttestationReport r ON r.server = s " +
+                        "WHERE u = :user " +
+                        "ORDER BY r.created DESC", ServerCoCoAttestationReport.class)
+                .setParameter("user", user)
+                .setMaxResults(limitIn)
+                .setFirstResult(offsetIn)
+                .list();
+    }
+
+    /**
+     * Return a list of reports with at least one of the corresponding CoCoAttestationResult in QUEUED status
+     * together with the corresponding minion
+     *
+     * @return list of reports
+     */
+    public List<ServerCoCoAttestationReport> listCoCoQueuedReports() {
+        return getSession().createQuery("""
+                        FROM ServerCoCoAttestationReport rpt
+                        JOIN CoCoAttestationResult res
+                            ON rpt.id = res.report.id
+                        WHERE res.status = :status
+                        """, ServerCoCoAttestationReport.class)
+                .setParameter("status", CoCoResultStatus.QUEUED)
+                .list();
+    }
+
+    /**
+     * @param actionIn the action
+     * @return returns the attestation result for this action if available
+     */
+    public Optional<CoCoAttestationResult> lookupResultByAction(Action actionIn) {
+        return getSession()
+                .createQuery("FROM CoCoAttestationResult WHERE actionId = :actionId",
+                        CoCoAttestationResult.class)
+                .setParameter("actionId", actionIn.getId())
+                .uniqueResultOptional();
     }
 }

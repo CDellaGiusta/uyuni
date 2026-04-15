@@ -5353,9 +5353,6 @@ public class SystemHandler extends BaseHandler {
         catch (AttestationDisabledException e) {
             throw new UnsupportedOperationException(e);
         }
-        catch (com.redhat.rhn.taskomatic.TaskomaticApiException e) {
-            throw new TaskomaticApiException(e.getMessage());
-        }
     }
 
     /**

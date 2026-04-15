@@ -79,7 +79,6 @@ import com.suse.manager.webui.utils.gson.PackageActionJson;
 import com.suse.manager.webui.utils.gson.PagedDataResultJson;
 import com.suse.manager.webui.utils.gson.ResultJson;
 import com.suse.manager.webui.utils.gson.SaltMinionJson;
-import com.suse.manager.webui.utils.gson.ScheduledRequestJson;
 import com.suse.manager.webui.utils.gson.ServerSetProxyJson;
 import com.suse.manager.webui.utils.gson.SupportDataRequest;
 import com.suse.manager.webui.utils.gson.SystemScheduledRequestJson;
@@ -163,9 +162,9 @@ public class MinionsAPI {
      * @param dataFactoryIn the migration data factory
      */
     public MinionsAPI(SaltApi saltApiIn, SSHMinionBootstrapper sshMinionBootstrapperIn,
-                      RegularMinionBootstrapper regularMinionBootstrapperIn, SaltKeyUtils saltKeyUtilsIn,
-                      AttestationManager attestationManagerIn, TaskomaticApi taskomaticApiIn,
-                      CloudPaygManager cloudPaygManagerIn, MigrationDataFactory dataFactoryIn) {
+                         RegularMinionBootstrapper regularMinionBootstrapperIn, SaltKeyUtils saltKeyUtilsIn,
+                         AttestationManager attestationManagerIn, TaskomaticApi taskomaticApiIn,
+                         CloudPaygManager cloudPaygManagerIn, MigrationDataFactory dataFactoryIn) {
         this.saltApi = saltApiIn;
         this.sshMinionBootstrapper = sshMinionBootstrapperIn;
         this.regularMinionBootstrapper = regularMinionBootstrapperIn;
@@ -207,40 +206,40 @@ public class MinionsAPI {
 
     private void initDetailsRoutes() {
         post("/manager/api/systems/:sid/details/uploadSupportData",
-            asJson(withUserAndServer(this::uploadSupportData)));
+                asJson(withUserAndServer(this::uploadSupportData)));
     }
 
     private void initPTFRoutes() {
         get("/manager/api/systems/:sid/details/ptf/allowedActions",
-            asJson(withUserAndServer(this::allowedPtfActions)));
+                asJson(withUserAndServer(this::allowedPtfActions)));
         get("/manager/api/systems/:sid/details/ptf/installed",
-            asJson(withUserAndServer(this::installedPtfsForSystem)));
+                asJson(withUserAndServer(this::installedPtfsForSystem)));
         get("/manager/api/systems/:sid/details/ptf/available",
-            asJson(withUserAndServer(this::availablePtfsForSystem)));
+                asJson(withUserAndServer(this::availablePtfsForSystem)));
         post("/manager/api/systems/:sid/details/ptf/scheduleAction",
-            asJson(withUserAndServer(this::schedulePtfAction)));
+                asJson(withUserAndServer(this::schedulePtfAction)));
     }
 
     private void initCoCoRoutes() {
         get("/manager/api/systems/:sid/details/coco/settings",
-            asJson(withUserAndServer(this::getCoCoSettings)));
+                asJson(withUserAndServer(this::getCoCoSettings)));
         post("/manager/api/systems/:sid/details/coco/settings",
-            asJson(withUserAndServer(this::setCoCoSettings)));
+                asJson(withUserAndServer(this::setCoCoSettings)));
         get("/manager/api/systems/:sid/details/coco/listAttestations",
-            asJson(withUserAndServer(this::listAllAttestations)));
+                asJson(withUserAndServer(this::listAllAttestations)));
         post("/manager/api/systems/:sid/details/coco/scheduleAction",
-            asJson(withUserAndServer(this::scheduleCoCoAttestation)));
+                asJson(withUserAndServer(this::scheduleCoCoAttestation)));
         post("/manager/api/systems/coco/settings",
-            asJson(withUser(this::setAllCoCoSettings)));
+                asJson(withUser(this::setAllCoCoSettings)));
         post("/manager/api/systems/coco/scheduleAction",
-            asJson(withUser(this::scheduleAllCoCoAttestation)));
+                asJson(withUser(this::scheduleAllCoCoAttestation)));
     }
 
     private void initMigrationRoutes() {
         post("/manager/api/systems/migration/computeChannels",
-            asJson(withUser(this::computeMigrationChannels)));
+                asJson(withUser(this::computeMigrationChannels)));
         post("/manager/api/systems/migration/schedule",
-            asJson(withUser(this::scheduleMigration)));
+                asJson(withUser(this::scheduleMigration)));
     }
 
     /**
@@ -256,13 +255,13 @@ public class MinionsAPI {
         boolean isOrgAdmin = user.hasRole(RoleFactory.ORG_ADMIN);
 
         Set<String> minionIds = Stream.of(
-                fingerprints.getMinions(),
-                fingerprints.getDeniedMinions(),
-                fingerprints.getRejectedMinions(),
-                fingerprints.getUnacceptedMinions()
-        ).flatMap(s -> s.keySet()
-         .stream())
-         .collect(Collectors.toSet());
+                        fingerprints.getMinions(),
+                        fingerprints.getDeniedMinions(),
+                        fingerprints.getRejectedMinions(),
+                        fingerprints.getUnacceptedMinions()
+                ).flatMap(s -> s.keySet()
+                        .stream())
+                .collect(Collectors.toSet());
 
         Map<String, Long> serverIdMapping = MinionServerFactory
                 .lookupByMinionIds(minionIds)
@@ -273,7 +272,7 @@ public class MinionsAPI {
                 .collect(Collectors.toMap(MinionServer::getMinionId, MinionServer::getId));
 
         Predicate<String> isVisible = (minionId) ->
-            visibleToUser.containsKey(minionId) || !serverIdMapping.containsKey(minionId);
+                visibleToUser.containsKey(minionId) || !serverIdMapping.containsKey(minionId);
 
         var minions = SaltMinionJson.fromFingerprints(fingerprints, visibleToUser, isVisible);
         return json(response, new ListKeysJson(isOrgAdmin, minions), new TypeToken<>() { });
@@ -399,13 +398,13 @@ public class MinionsAPI {
                 ServerSetProxyJson.class);
 
         try {
-             Map<String, Object> data = new TreeMap<>();
-             List<Long> actions = ActionManager.changeProxy(user, rq.getIds(), rq.getProxy());
-             if (actions.isEmpty()) {
-                 throw new IllegalStateException("No action in schedule result");
-             }
-             data.put("actions", actions);
-             return json(GSON, res, ResultJson.success(data), new TypeToken<>() { });
+            Map<String, Object> data = new TreeMap<>();
+            List<Long> actions = ActionManager.changeProxy(user, rq.getIds(), rq.getProxy());
+            if (actions.isEmpty()) {
+                throw new IllegalStateException("No action in schedule result");
+            }
+            data.put("actions", actions);
+            return json(GSON, res, ResultJson.success(data), new TypeToken<>() { });
         }
         catch (Exception e) {
             LOG.error("Could not change proxy", e);
@@ -457,12 +456,12 @@ public class MinionsAPI {
 
     private static Action createSupportDataAction(User user, Server server, SupportDataRequest scheduleRequest) {
         return ActionManager.scheduleSupportDataAction(
-            user,
-            server.getId(),
-            scheduleRequest.caseNumber(),
-            scheduleRequest.parameters(),
-            UploadGeoType.byLabel(scheduleRequest.region()),
-            scheduleRequest.earliest()
+                user,
+                server.getId(),
+                scheduleRequest.caseNumber(),
+                scheduleRequest.parameters(),
+                UploadGeoType.byLabel(scheduleRequest.region()),
+                scheduleRequest.earliest()
         );
     }
 
@@ -481,7 +480,7 @@ public class MinionsAPI {
 
         List<String> allowedActions = new ArrayList<>();
         if (SystemManager.serverHasFeature(server.getId(), "ftr_package_remove") &&
-            ServerFactory.isPtfUninstallationSupported(server)) {
+                ServerFactory.isPtfUninstallationSupported(server)) {
             allowedActions.add(ActionFactory.TYPE_PACKAGES_REMOVE.getLabel());
         }
 
@@ -581,7 +580,7 @@ public class MinionsAPI {
         catch (TaskomaticApiException e) {
             LOG.error("Unable to schedule package remove action", e);
             return json(GSON, response, HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
+                    ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
         }
 
         return json(GSON, response, result.longValue());
@@ -602,8 +601,8 @@ public class MinionsAPI {
 
     private static List<String> listAllSelectionKey(DataResult<PackageListItem> resultList) {
         return resultList.stream()
-                         .map(PackageListItem::getSelectionKey)
-                         .collect(Collectors.toList());
+                .map(PackageListItem::getSelectionKey)
+                .collect(Collectors.toList());
     }
 
     private static Set<String> getSessionSet(Request request, Server server, String setLabel) {
@@ -622,12 +621,12 @@ public class MinionsAPI {
     public String getCoCoSettings(Request request, Response response, User user, Server server) {
         if (!server.doesOsSupportCoCoAttestation()) {
             return json(GSON, response, ResultJson.success(new CoCoSettingsJson(false),
-                LOCAL.getMessage("system.audit.coco.unsupported")), new TypeToken<>() { });
+                    LOCAL.getMessage("system.audit.coco.unsupported")), new TypeToken<>() { });
         }
 
         CoCoSettingsJson jsonConfig = attestationManager.getConfig(user, server)
-            .map(cfg -> new CoCoSettingsJson(cfg))
-            .orElseGet(() -> new CoCoSettingsJson(true));
+                .map(cfg -> new CoCoSettingsJson(cfg))
+                .orElseGet(() -> new CoCoSettingsJson(true));
 
         return json(GSON, response, ResultJson.success(jsonConfig), new TypeToken<>() { });
     }
@@ -644,11 +643,11 @@ public class MinionsAPI {
             ServerCoCoAttestationConfig updatedConfig = updateServerCoCoConfiguration(user, server, jsonConfig);
 
             return json(GSON, response, ResultJson.success(new CoCoSettingsJson(updatedConfig),
-                LOCAL.getMessage("system.audit.coco.configUpdated")), new TypeToken<>() { });
+                    LOCAL.getMessage("system.audit.coco.configUpdated")), new TypeToken<>() { });
         }
         catch (RuntimeException ex) {
             return json(GSON, response, ResultJson.error(LOCAL.getMessage("system.audit.coco.configNotUpdated")),
-                new TypeToken<>() { });
+                    new TypeToken<>() { });
         }
     }
 
@@ -659,13 +658,13 @@ public class MinionsAPI {
         long totalSize = attestationManager.countCoCoAttestationReportsForUserAndServer(user, server);
 
         List<CoCoAttestationReportJson> reportsJson =
-            attestationManager.listCoCoAttestationReportsForUserAndServer(user, server, pc)
-            .stream()
-            .map(CoCoAttestationReportJson::new)
-            .collect(Collectors.toList());
+                attestationManager.listCoCoAttestationReportsForUserAndServer(user, server, pc)
+                        .stream()
+                        .map(CoCoAttestationReportJson::new)
+                        .collect(Collectors.toList());
 
         return json(GSON, response, new PagedDataResultJson<>(reportsJson, totalSize, Collections.emptySet()),
-            new TypeToken<>() { });
+                new TypeToken<>() { });
     }
 
     private String scheduleCoCoAttestation(Request request, Response response, User user, Server server) {
@@ -673,30 +672,25 @@ public class MinionsAPI {
             return json(GSON, response, ResultJson.error("system.audit.coco.unsupported"), new TypeToken<>() { });
         }
 
-        ScheduledRequestJson scheduleRequest = GSON.fromJson(request.body(), ScheduledRequestJson.class);
-
-        Date earliestDate = MinionActionUtils.getScheduleDate(scheduleRequest.getEarliest());
-        ActionChain chain = MinionActionUtils.getActionChain(scheduleRequest.getActionChain(), user);
-
-        Long result;
+        //ScheduledRequestJson scheduleRequest = GSON.fromJson(request.body(), ScheduledRequestJson.class);
 
         try {
             MinionServer minion = server.asMinionServer().orElse(null);
             if (minion == null) {
                 return json(GSON, response, HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                    ResultJson.error("System is not a minion"), new TypeToken<>() { });
+                        ResultJson.error("System is not a minion"), new TypeToken<>() { });
             }
 
-            Action action = attestationManager.scheduleAttestationAction(user, minion, earliestDate, chain);
-            result = chain != null ? chain.getId() : action.getId();
+            attestationManager.scheduleAttestation(user, minion);
         }
-        catch (TaskomaticApiException e) {
+        catch (Exception e) {
             LOG.error("Unable to schedule attestation action", e);
             return json(GSON, response, HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
+                    ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
         }
 
-        return json(GSON, response, result.longValue());
+        long result = 1;
+        return json(GSON, response, result);
     }
 
     private String setAllCoCoSettings(Request request, Response response, User user) {
@@ -704,34 +698,34 @@ public class MinionsAPI {
 
         try {
             MinionServerFactory.lookupByIds(jsonConfig.getServerIds())
-                .forEach(minionServer -> updateServerCoCoConfiguration(user, minionServer, jsonConfig));
+                    .forEach(minionServer -> updateServerCoCoConfiguration(user, minionServer, jsonConfig));
 
             return json(GSON, response, ResultJson.success(jsonConfig,
-                LOCAL.getMessage("system.audit.coco.configUpdated")), new TypeToken<>() { });
+                    LOCAL.getMessage("system.audit.coco.configUpdated")), new TypeToken<>() { });
         }
         catch (RuntimeException ex) {
             return json(GSON, response, ResultJson.error(LOCAL.getMessage("system.audit.coco.configNotUpdated")),
-                new TypeToken<>() { });
+                    new TypeToken<>() { });
         }
     }
 
     private ServerCoCoAttestationConfig updateServerCoCoConfiguration(User user, Server server,
                                                                       CoCoSettingsJson jsonConfig) {
         return attestationManager.getConfig(user, server)
-            .map(cfg -> {
-                cfg.setEnabled(jsonConfig.isEnabled());
-                cfg.setEnvironmentType(jsonConfig.getEnvironmentType());
-                cfg.setAttestOnBoot(jsonConfig.isAttestOnBoot());
+                .map(cfg -> {
+                    cfg.setEnabled(jsonConfig.isEnabled());
+                    cfg.setEnvironmentType(jsonConfig.getEnvironmentType());
+                    cfg.setAttestOnBoot(jsonConfig.isAttestOnBoot());
 
-                attestationManager.saveConfig(user, cfg);
+                    attestationManager.saveConfig(user, cfg);
 
-                return cfg;
-            })
-            .orElseGet(() -> attestationManager.createConfig(user, server,
-                jsonConfig.getEnvironmentType(),
-                jsonConfig.isEnabled(),
-                jsonConfig.isAttestOnBoot()
-            ));
+                    return cfg;
+                })
+                .orElseGet(() -> attestationManager.createConfig(user, server,
+                        jsonConfig.getEnvironmentType(),
+                        jsonConfig.isEnabled(),
+                        jsonConfig.isAttestOnBoot()
+                ));
     }
 
     private String scheduleAllCoCoAttestation(Request request, Response response, User user) {
@@ -743,16 +737,16 @@ public class MinionsAPI {
 
         try {
             Set<MinionServer> minionsSet = MinionServerFactory.lookupByIds(scheduleRequest.getServerIds())
-                .collect(Collectors.toSet());
+                    .collect(Collectors.toSet());
 
             List<CoCoAttestationAction> scheduledActions =
-                attestationManager.scheduleAttestationActionForSystems(user, minionsSet, earliestDate, chain);
+                    attestationManager.scheduleAttestationActionForSystems(user, minionsSet, earliestDate, chain);
             result = chain != null ? chain.getId() : scheduledActions.get(0).getId();
         }
-        catch (TaskomaticApiException e) {
+        catch (Exception e) {
             LOG.error("Unable to schedule attestation action", e);
             return json(GSON, response, HttpStatus.SC_INTERNAL_SERVER_ERROR,
-                ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
+                    ResultJson.error("Unable to schedule action"), new TypeToken<>() { });
         }
 
         return json(GSON, response, result.longValue());
@@ -772,21 +766,23 @@ public class MinionsAPI {
 
         try {
             List<MinionServer> serverList = MinionServerFactory.lookupByIds(migrationChannelsRequest.serverIds())
-                .toList();
+                    .toList();
             if (CollectionUtils.isEmpty(serverList)) {
                 throw new IllegalArgumentException(LOCAL.getMessage("system.migration.noServersSelected"));
             }
 
             // Extract the common base product to use as source of the migration, if possible
             SUSEProductSet source = DistUpgradeManager.getCommonSourceProduct(serverList)
-                .orElseThrow(() -> new IllegalArgumentException(LOCAL.getMessage("system.migration.noCommonProduct")));
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            LOCAL.getMessage("system.migration.noCommonProduct")));
 
             // Compute the targets from the common base, considering only the system with correct base installed
             SUSEProductSet target = DistUpgradeManager.getTargetProductSets(user, serverList, Optional.of(source))
-                .stream()
-                .filter(productSet -> migrationChannelsRequest.targetId().equals(productSet.getSerializedProductIDs()))
-                .findFirst()
-                .orElseThrow(() -> new IllegalArgumentException(LOCAL.getMessage("system.migration.noTarget")));
+                    .stream()
+                    .filter(productSet -> migrationChannelsRequest.targetId()
+                            .equals(productSet.getSerializedProductIDs()))
+                    .findFirst()
+                    .orElseThrow(() -> new IllegalArgumentException(LOCAL.getMessage("system.migration.noTarget")));
 
             var channelsData = dataFactory.toMigrationChannelsSelection(serverList, user, target, source);
             return json(GSON, response, ResultJson.success(channelsData), new TypeToken<>() { });
@@ -814,8 +810,8 @@ public class MinionsAPI {
 
         try {
             List<Server> serverList = MinionServerFactory.lookupByIds(scheduleRequest.serverIds())
-                .map(Server.class::cast)
-                .toList();
+                    .map(Server.class::cast)
+                    .toList();
 
             SUSEProductSet targetProductSet = dataFactory.toSUSEProductSet(scheduleRequest.targetProduct());
             List<Long> channelIds = dataFactory.toChannelIds(scheduleRequest.targetChannelTree());
@@ -828,9 +824,9 @@ public class MinionsAPI {
             ActionChain actionChain = scheduleRequest.getActionChain(user);
 
             List<DistUpgradeAction> scheduledActions = DistUpgradeManager.scheduleDistUpgrade(
-                user, serverList, targetProductSet, channelIds,
-                dryRun, allowVendorChange, isPayg,
-                earliestDate, actionChain
+                    user, serverList, targetProductSet, channelIds,
+                    dryRun, allowVendorChange, isPayg,
+                    earliestDate, actionChain
             );
 
             Long result = actionChain != null ? actionChain.getId() : scheduledActions.get(0).getId();

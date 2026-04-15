@@ -15,14 +15,26 @@
 
 package com.redhat.rhn.taskomatic.task;
 
+import com.redhat.rhn.common.hibernate.LookupException;
+import com.redhat.rhn.frontend.xmlrpc.EntityNotExistsFaultException;
+import com.redhat.rhn.frontend.xmlrpc.TaskomaticApiException;
+import com.redhat.rhn.frontend.xmlrpc.UnsupportedOperationException;
+
+import com.suse.manager.attestation.AttestationDisabledException;
 import com.suse.manager.attestation.AttestationManager;
+import com.suse.manager.model.attestation.CoCoAttestationResult;
+import com.suse.manager.model.attestation.CoCoResultStatus;
+import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
 
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 
+import java.util.List;
+
 /**
  * Schedules confidential computing attestations on minions
- * */
+ *
+ */
 public class CoCoAttestatorTask extends RhnJavaJob {
 
     /**
@@ -50,10 +62,31 @@ public class CoCoAttestatorTask extends RhnJavaJob {
     }
 
     @Override
-    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+    public void execute(JobExecutionContext context) throws JobExecutionException {
         log.info("Schedules confidential computing attestations on minions");
 
+        try {
+            List<ServerCoCoAttestationReport> queuedReports = attestationManager.listCoCoQueuedReports();
+
+            for (ServerCoCoAttestationReport report : queuedReports) {
+                if (report.getResults().stream()
+                        .map(CoCoAttestationResult::getStatus)
+                        .allMatch(status -> CoCoResultStatus.QUEUED == status)) {
+                    attestationManager.sumbitAttestationAction(report);
+                }
+            }
+        }
+        catch (LookupException e) {
+            throw new EntityNotExistsFaultException(e);
+        }
+        catch (AttestationDisabledException e) {
+            throw new UnsupportedOperationException(e);
+        }
+        catch (com.redhat.rhn.taskomatic.TaskomaticApiException e) {
+            throw new TaskomaticApiException(e.getMessage());
+        }
 
         log.info("Done Schedules confidential computing attestations on minions");
     }
+
 }

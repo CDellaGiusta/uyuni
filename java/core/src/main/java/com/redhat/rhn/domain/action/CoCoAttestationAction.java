@@ -16,24 +16,22 @@ import com.redhat.rhn.domain.action.server.ServerAction;
 import com.redhat.rhn.domain.server.MinionSummary;
 
 import com.suse.manager.attestation.AttestationManager;
-import com.suse.manager.model.attestation.CoCoReportStatus;
-import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
+import com.suse.manager.model.attestation.CoCoAttestationResult;
+import com.suse.manager.model.attestation.CoCoResultStatus;
 import com.suse.manager.utils.SaltUtils;
-import com.suse.manager.webui.services.SaltParameters;
-import com.suse.manager.webui.utils.salt.custom.CoCoAttestationRequestData;
+import com.suse.manager.webui.utils.salt.custom.coco.CoCoAttestationResponseDataParser;
 import com.suse.salt.netapi.calls.LocalCall;
 import com.suse.salt.netapi.calls.modules.State;
-import com.suse.utils.Json;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSyntaxException;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -52,25 +50,18 @@ public class CoCoAttestationAction extends Action {
 
     @Override
     public void onFailAction(ServerAction serverActionIn) {
-        AttestationManager attestationManager = GlobalInstanceHolder.ATTESTATION_MANAGER;
         if (!Objects.equals(serverActionIn.getParentAction(), this)) {
             LOG.error("This is not the action which belongs to the passed server action");
             return;
         }
-        try {
-            Optional<ServerCoCoAttestationReport> report = attestationManager.lookupReportByServerAndAction(
-                    serverActionIn.getServer(), this);
-            report.ifPresent(rep -> {
-                if (rep.getResults().isEmpty()) {
-                    // results are not initialized yet. So we need to set the report status
-                    // directly to failed.
-                    rep.setStatus(CoCoReportStatus.FAILED);
-                }
-            });
+
+        Optional<CoCoAttestationResult> optResult = getOptResult();
+        if (optResult.isEmpty()) {
+            LOG.error("Error in failing attestation action: failed to find a result entry");
+            return;
         }
-        catch (Exception e) {
-            LOG.log(Level.ERROR, e);
-        }
+        CoCoAttestationResult result = optResult.get();
+        result.setStatus(CoCoResultStatus.FAILED);
     }
 
     /**
@@ -78,10 +69,25 @@ public class CoCoAttestationAction extends Action {
      */
     @Override
     public Map<LocalCall<?>, List<MinionSummary>> getSaltCalls(List<MinionSummary> minionSummaries) {
-        return Map.of(
-                State.apply(Collections.singletonList(SaltParameters.COCOATTEST_REQUESTDATA), Optional.empty()),
-                minionSummaries
-        );
+        Optional<CoCoAttestationResult> optResult = getOptResult();
+        if (optResult.isEmpty()) {
+            LOG.error("Error while computing salt calls for attestation: failed to find a result entry");
+            return new HashMap<>();
+        }
+
+        CoCoAttestationResult result = optResult.get();
+        String saltState = result.getResultType().getSaltState();
+        if (StringUtils.isBlank(saltState)) {
+            LOG.error("Error while computing salt calls for attestation: salt state not found, result {} id = {}",
+                    result.getResultType().getTypeLabel(), result.getId());
+
+            return new HashMap<>();
+        }
+
+        //pillar data sent to minion during coco attestation is cryptographically safe by design!
+        Optional<Map<String, Object>> pillarData = getPillarData(result, minionSummaries);
+
+        return Map.of(State.apply(Collections.singletonList(saltState), pillarData), minionSummaries);
     }
 
     /**
@@ -89,53 +95,76 @@ public class CoCoAttestationAction extends Action {
      */
     @Override
     public void handleUpdateServerAction(ServerAction serverAction, JsonElement jsonResult, UpdateAuxArgs auxArgs) {
-        AttestationManager mgr = new AttestationManager();
 
-        Optional<ServerCoCoAttestationReport> optReport =
-                mgr.lookupReportByServerAndAction(serverAction.getServer(), this);
-        if (optReport.isEmpty()) {
-            serverAction.setStatusFailed();
-            serverAction.setResultMsg("Failed to find a report entry");
+        Optional<CoCoAttestationResult> optResult = getOptResult();
+        if (optResult.isEmpty()) {
+            setFailure(serverAction, "Failed to find a result entry");
             return;
         }
-        ServerCoCoAttestationReport report = optReport.get();
+
+        CoCoAttestationResult result = optResult.get();
 
         if (jsonResult == null) {
-            serverAction.setStatusFailed();
-            if (StringUtils.isBlank(serverAction.getResultMsg())) {
-                serverAction.setResultMsg("Error while request attestation data from target system:\n" +
-                        "Got no result from system");
-            }
+            setFailure(serverAction, result,
+                    StringUtils.isBlank(serverAction.getResultMsg()) ?
+                            "Got no result from system" : serverAction.getResultMsg());
             return;
         }
 
         try {
-            CoCoAttestationRequestData requestData = Json.GSON.fromJson(jsonResult, CoCoAttestationRequestData.class);
-            report.setOutData(requestData.asMap());
-            mgr.initializeResults(report);
+            CoCoAttestationResponseDataParser responseDataParser = new CoCoAttestationResponseDataParser();
+            responseDataParser.parse(jsonResult);
+
+            result.setOutData(responseDataParser.asMap());
+            result.setStatus(CoCoResultStatus.PENDING);
         }
         catch (JsonSyntaxException e) {
-            String msg = "Failed to parse the attestation result:\n";
-            msg += Optional.of(jsonResult)
-                    .map(JsonElement::toString)
-                    .orElse("Got no result");
-            LOG.error(msg);
-            serverAction.setStatusFailed();
-            serverAction.setResultMsg(msg);
+            setFailure(serverAction, result,
+                    "Failed to parse the attestation result:%n%s".formatted(
+                            Optional.of(jsonResult).map(JsonElement::toString).orElse("Got no result")));
             return;
         }
+
         if (serverAction.isStatusFailed()) {
-            String msg = "Error while request attestation data from target system:\n";
-            msg += SaltUtils.getJsonResultWithPrettyPrint(jsonResult);
-            serverAction.setResultMsg(msg);
-            if (report.getResults().isEmpty()) {
-                // results are not initialized yet. So we need to set the report status
-                // directly to failed.
-                report.setStatus(CoCoReportStatus.FAILED);
-            }
+            setFailure(serverAction, result, SaltUtils.getJsonResultWithPrettyPrint(jsonResult));
         }
         else {
-            serverAction.setResultMsg("Successfully collected attestation data");
+            serverAction.setResultMsg("Successfully collected attestation data response");
         }
     }
+
+    private Optional<CoCoAttestationResult> getOptResult() {
+        AttestationManager mgr = GlobalInstanceHolder.ATTESTATION_MANAGER;
+        return mgr.lookupResultByAction(this);
+    }
+
+    private void setFailure(ServerAction serverAction, String errorMessage) {
+        serverAction.setStatusFailed();
+        serverAction.setResultMsg("Error while handling attestation data response from target system:%n%s"
+                .formatted(errorMessage));
+        LOG.error(errorMessage);
+    }
+
+    private void setFailure(ServerAction serverAction, CoCoAttestationResult result, String errorMessage) {
+        setFailure(serverAction, errorMessage);
+        result.setProcessOutput(errorMessage);
+        result.setStatus(CoCoResultStatus.FAILED);
+    }
+
+    private Optional<Map<String, Object>> getPillarData(CoCoAttestationResult result,
+                                                        List<MinionSummary> minionSummaries) {
+        if (minionSummaries.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Map<String, Object> pillarData = new HashMap<>();
+
+        Map<String, Object> attestationPillar = new HashMap<>(result.getInData());
+        attestationPillar.put("environment_type", result.getEnvironmentType().name());
+
+        pillarData.put("attestation_data", attestationPillar);
+
+        return Optional.of(pillarData);
+    }
+
 }

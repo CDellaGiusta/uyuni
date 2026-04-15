@@ -358,7 +358,7 @@ public class RegisterMinionEventMessageAction implements MessageAction {
             Date scheduleAt = Date.from(Instant.now().plus(rand, ChronoUnit.SECONDS));
             attestationManager.scheduleAttestationActionFromSystem(minion.getOrg(), minion, scheduleAt);
         }
-        catch (TaskomaticApiException e) {
+        catch (Exception e) {
             LOG.error("Unable to schedule attestation action. ", e);
         }
     }

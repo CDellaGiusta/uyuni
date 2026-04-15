@@ -33,13 +33,13 @@ import com.redhat.rhn.taskomatic.TaskomaticApiException;
 import com.suse.manager.model.attestation.AttestationFactory;
 import com.suse.manager.model.attestation.CoCoAttestationResult;
 import com.suse.manager.model.attestation.CoCoEnvironmentType;
+import com.suse.manager.model.attestation.CoCoResultStatus;
 import com.suse.manager.model.attestation.ServerCoCoAttestationConfig;
 import com.suse.manager.model.attestation.ServerCoCoAttestationReport;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -54,7 +54,6 @@ public class AttestationManager {
     private static final Logger LOG = LogManager.getLogger(AttestationManager.class);
     private final AttestationFactory factory;
     private final TaskomaticApi taskomaticApi;
-    private SecureRandom secureRandom = new SecureRandom();
 
     /**
      * Constructor
@@ -80,8 +79,7 @@ public class AttestationManager {
      * @param earliest the earliest execution date
      * @return returns a {@link CoCoAttestationAction}
      */
-    public CoCoAttestationAction scheduleAttestationAction(User userIn, MinionServer minionIn, Date earliest)
-        throws TaskomaticApiException {
+    public CoCoAttestationAction scheduleAttestationAction(User userIn, MinionServer minionIn, Date earliest) {
         return scheduleAttestationAction(userIn, minionIn, earliest, null);
     }
 
@@ -94,13 +92,25 @@ public class AttestationManager {
      * @return returns a {@link CoCoAttestationAction}
      */
     public CoCoAttestationAction scheduleAttestationAction(User userIn, MinionServer minionIn, Date earliest,
-                                                           ActionChain actionChain)
-            throws TaskomaticApiException {
+                                                           ActionChain actionChain) {
         ensureSystemAccessible(userIn, minionIn);
         ensureSystemConfigured(minionIn);
         List<CoCoAttestationAction> coCoAttestationActions = scheduleAttestationAction(Optional.of(userIn),
-            userIn.getOrg(), Set.of(minionIn), earliest, actionChain);
+                userIn.getOrg(), Set.of(minionIn), earliest, actionChain);
         return coCoAttestationActions.get(0);
+    }
+
+    /**
+     * Create an Attestation Action for a given minion.
+     * @param userIn the user
+     * @param minionIn the minion
+     */
+    public void scheduleAttestation(User userIn, MinionServer minionIn) {
+        ensureSystemAccessible(userIn, minionIn);
+        ensureSystemConfigured(minionIn);
+
+        ServerCoCoAttestationReport initReport = factory.createReportForServer(minionIn);
+        factory.initResultsForReport(initReport);
     }
 
     /**
@@ -109,8 +119,7 @@ public class AttestationManager {
      * @param minionIn the minion
      * @param earliest the earliest execution date
      */
-    public void scheduleAttestationActionFromSystem(Org orgIn, MinionServer minionIn, Date earliest)
-            throws TaskomaticApiException {
+    public void scheduleAttestationActionFromSystem(Org orgIn, MinionServer minionIn, Date earliest) {
         ensureSystemConfigured(minionIn);
         scheduleAttestationAction(Optional.empty(), orgIn, Set.of(minionIn), earliest, null);
     }
@@ -124,13 +133,14 @@ public class AttestationManager {
      * @return the list of scheduled actions
      */
     public List<CoCoAttestationAction> scheduleAttestationActionForSystems(User userIn, Set<MinionServer> minionsSet,
-            Date earliest, ActionChain actionChain) throws TaskomaticApiException {
+                                                                           Date earliest, ActionChain actionChain) {
         minionsSet.forEach(minion -> ensureSystemConfigured(minion));
         return scheduleAttestationAction(Optional.empty(), userIn.getOrg(), minionsSet, earliest, actionChain);
     }
 
     private List<CoCoAttestationAction> scheduleAttestationAction(Optional<User> userIn, Org orgIn,
-            Set<MinionServer> minionsSet, Date earliest, ActionChain actionChain) throws TaskomaticApiException {
+                                                                  Set<MinionServer> minionsSet,
+                                                                  Date earliest, ActionChain actionChain) {
         if (actionChain != null) {
             return scheduleActionChain(userIn, orgIn, minionsSet, earliest, actionChain);
         }
@@ -139,8 +149,7 @@ public class AttestationManager {
     }
 
     private List<CoCoAttestationAction> scheduleSingleAction(Optional<User> userIn, Org orgIn,
-                                                                  Set<MinionServer> minionsSet, Date earliest)
-        throws TaskomaticApiException {
+                                                             Set<MinionServer> minionsSet, Date earliest) {
         CoCoAttestationAction action = createAttestationAction(userIn.orElse(null), orgIn, earliest);
         minionsSet.forEach(minionServer -> initializeAttestation(action, minionServer));
 
@@ -148,10 +157,39 @@ public class AttestationManager {
         ActionFactory.scheduleForExecution(action, minionIds);
 
         CoCoAttestationAction updated = (CoCoAttestationAction) ActionFactory.save(action);
-        taskomaticApi.scheduleActionExecution(updated);
+        //taskomaticApi.scheduleActionExecution(updated);
 
         return List.of(updated);
     }
+
+
+    /**
+     * Submits an Attestation Action for a given minion set.
+     * @param report the report
+     * @throws TaskomaticApiException
+     */
+    public void sumbitAttestationAction(ServerCoCoAttestationReport report) throws TaskomaticApiException {
+        Org org = report.getServer().getOrg();
+        Long minionId = report.getServer().getId();
+
+        for (CoCoAttestationResult result : report.getResults()) {
+
+            CoCoAttestationAction action = createAttestationAction(null, org, new Date());
+
+            result.setActionId(action.getId());
+
+            ActionFactory.scheduleForExecution(action, Set.of(minionId));
+
+            CoCoAttestationAction updated = ActionFactory.save(action);
+
+            result.setStatus(CoCoResultStatus.SUBMITTED);
+            //setResultsToSubmitted(report.getResults().stream().map(CoCoAttestationResult::getId).toList());
+            factory.save(result);
+
+            taskomaticApi.scheduleActionExecution(updated);
+        }
+    }
+
 
     private List<CoCoAttestationAction> scheduleActionChain(Optional<User> userIn, Org orgIn,
                                                             Set<MinionServer> minionsSet, Date earliest,
@@ -172,7 +210,7 @@ public class AttestationManager {
 
     private static CoCoAttestationAction createAttestationAction(User user, Org org, Date earliest) {
         CoCoAttestationAction action = (CoCoAttestationAction) ActionFactory.createAction(
-            ActionFactory.TYPE_COCO_ATTESTATION, earliest);
+                ActionFactory.TYPE_COCO_ATTESTATION, earliest);
         action.setSchedulerUser(user);
         action.setOrg(org);
         action.setName("Confidential Compute Attestation");
@@ -198,15 +236,15 @@ public class AttestationManager {
                                                     boolean enabledIn) {
         return createConfig(userIn, serverIn, typeIn, enabledIn, false);
     }
-        /**
-         * Create a Attestation configuration for a given server
-         * @param userIn the user
-         * @param serverIn the server
-         * @param typeIn the environment type
-         * @param enabledIn should the config been enabled
-         * @param attestOnBootIn should the attestation be performed on system boot
-         * @return returns the configuration
-         */
+    /**
+     * Create a Attestation configuration for a given server
+     * @param userIn the user
+     * @param serverIn the server
+     * @param typeIn the environment type
+     * @param enabledIn should the config been enabled
+     * @param attestOnBootIn should the attestation be performed on system boot
+     * @return returns the configuration
+     */
     public ServerCoCoAttestationConfig createConfig(User userIn, Server serverIn, CoCoEnvironmentType typeIn,
                                                     boolean enabledIn, boolean attestOnBootIn) {
         ensureSystemAccessible(userIn, serverIn);
@@ -380,6 +418,25 @@ public class AttestationManager {
     public List<ServerCoCoAttestationReport> listCoCoAttestationReportsForUser(User userIn, int offset, int limit) {
         return factory.listCoCoAttestationReportsForUser(userIn, offset, limit);
     }
+
+    /**
+     * Return a list of reports with at least one of the corresponding CoCoAttestationResult in QUEUED status
+     * together with the corresponding minion
+     *
+     * @return list of reports
+     */
+    public List<ServerCoCoAttestationReport> listCoCoQueuedReports() {
+        return factory.listCoCoQueuedReports();
+    }
+
+    /**
+     * @param actionIn the action
+     * @return returns the attestation result for this action if available
+     */
+    public Optional<CoCoAttestationResult> lookupResultByAction(Action actionIn) {
+        return factory.lookupResultByAction(actionIn);
+    }
+
 
     private void ensureSystemAccessible(User userIn, Server serverIn) {
         if (serverIn == null) {
