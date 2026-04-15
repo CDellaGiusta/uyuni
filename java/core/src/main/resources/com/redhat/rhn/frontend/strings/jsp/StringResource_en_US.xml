@@ -23660,6 +23660,12 @@ given channel.</source>
           <context context-type="sourcefile">/rhn/admin/BunchDetail.do</context>
         </context-group>
       </trans-unit>
+        <trans-unit id="bunch.jsp.description.coco-attestator-bunch" xml:space="preserve">
+        <source>Schedules confidential computing attestations on minions</source>
+            <context-group name="ctx">
+          <context context-type="sourcefile">/rhn/admin/BunchDetail.do</context>
+        </context-group>
+      </trans-unit>
       <trans-unit id="schedule.jsp.noschedules" xml:space="preserve">
         <source>There're no schedules available.</source>
         <context-group name="ctx">
@@ -24005,6 +24011,9 @@ given channel.</source>
       </trans-unit>
       <trans-unit id="task.status.taskomatic.on" xml:space="preserve">
         <source>Scheduling Service</source>
+      </trans-unit>
+      <trans-unit id="task.status.coco-attestator" xml:space="preserve">
+        <source>Confidential Computing Attestation</source>
       </trans-unit>
       <trans-unit id="task.status.session-cleanup" xml:space="preserve">
         <source>Session Cleanup</source>

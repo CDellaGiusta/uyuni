@@ -156,4 +156,7 @@ VALUES (sequence_nextval('rhn_tasko_bunch_id_seq'), 'compare-task-bunch', 'Sched
 INSERT INTO rhnTaskoBunch (id, name, description, org_bunch)
 VALUES (sequence_nextval('rhn_tasko_bunch_id_seq'), 'diskcheck-task-bunch', 'Schedules a disk check on server and DB', null);
 
+INSERT INTO rhnTaskoBunch (id, name, description, org_bunch)
+VALUES (sequence_nextval('rhn_tasko_bunch_id_seq'), 'coco-attestator-bunch', 'Schedules confidential computing attestations on minions', null);
+
 commit;
