@@ -19,23 +19,29 @@ import com.redhat.rhn.common.localization.LocalizationService;
 import java.util.Arrays;
 
 public enum CoCoResultType {
-    NONE(0),
-    SEV_SNP(1),
-    SECURE_BOOT(2);
+    NONE(0, ""),
+    SEV_SNP(1, "cocoattest.amd_epyc_snpguest_request"),
+    SECURE_BOOT(2, "cocoattest.secure_boot");
     // ATTENTION: KEEP CoCoAttestationReport_queries.xml up to date !
 
     private final int value;
+    private final String saltState;
     private final String labelKey;
     private final String descriptionKey;
 
-    CoCoResultType(int valueIn) {
+    CoCoResultType(int valueIn, String saltStateIn) {
         value = valueIn;
+        saltState = saltStateIn;
         labelKey = "coco.resultType." + name().toLowerCase() + ".label";
         descriptionKey = "coco.resultType." + name().toLowerCase() + ".description";
     }
 
     public int getValue() {
         return value;
+    }
+
+    public String getSaltState() {
+        return saltState;
     }
 
     /**
