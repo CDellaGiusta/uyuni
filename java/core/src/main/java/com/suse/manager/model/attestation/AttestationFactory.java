@@ -43,6 +43,7 @@ public class AttestationFactory extends HibernateFactory {
      * @return the managed {@link ServerCoCoAttestationConfig}
      */
     public ServerCoCoAttestationConfig save(ServerCoCoAttestationConfig cnf) {
+        CarloHack.hack(cnf);
         return saveObject(cnf);
     }
 
