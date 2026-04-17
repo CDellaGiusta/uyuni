@@ -41,6 +41,7 @@ public class CoCoAttestationResponseDataParser {
         chunks.clear();
         chunks.add(Json.GSON.fromJson(jsonResult, CoCoAmdEpycAttestationResponseData.class));
         chunks.add(Json.GSON.fromJson(jsonResult, CoCoSecureBootAttestationResponseData.class));
+        chunks.add(Json.GSON.fromJson(jsonResult, CoCoIbmZAttestationResponseData.class));
         //add here further children of CoCoAbstractAttestationResponseData
     }
 
