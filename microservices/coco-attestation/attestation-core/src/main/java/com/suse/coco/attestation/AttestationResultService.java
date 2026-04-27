@@ -14,6 +14,7 @@ package com.suse.coco.attestation;
 import com.suse.coco.model.AttestationResult;
 import com.suse.coco.model.AttestationStatus;
 import com.suse.coco.module.AttestationWorker;
+import com.suse.coco.module.AttestationWorkerFactory;
 import com.suse.common.database.DatabaseSessionFactory;
 
 import org.apache.ibatis.exceptions.PersistenceException;
@@ -46,6 +47,7 @@ public class AttestationResultService {
 
     /**
      * Build a services with the given session factory.
+     *
      * @param sessionFactoryIn the sql session factory
      */
     public AttestationResultService(SqlSessionFactory sessionFactoryIn) {
@@ -54,25 +56,28 @@ public class AttestationResultService {
 
     /**
      * Retrieve the ids of the available attestation results with the given state and result type.
+     *
      * @param resultTypeList a list of possible result types to match
-     * @param batchSize the number of results to fetch at max
+     * @param batchSize      the number of results to fetch at max
      * @return the ids of the attestation results matching the criteria
      */
-    public List<Long> getPendingResultByType(Collection<Integer> resultTypeList, int batchSize) {
+    public List<Long> getResultByStatusAndType(Collection<Integer> resultTypeList, int batchSize) {
         try (SqlSession session = sessionFactory.openSession()) {
             return session.selectList(
-                "AttestationResult.listPendingForResultType",
-                Map.of("supportedTypes", resultTypeList, "batchSize", batchSize)
+                    "AttestationResult.listForResultType",
+                    Map.of("statusToListenList", AttestationStatus.statusToListenList(),
+                            "supportedTypes", resultTypeList, "batchSize", batchSize)
             );
         }
     }
 
     /**
      * Process an attestation result. The result is extracted from the database and locked for update.
-     * @param id the id of the attestation result
-     * @param worker the worker processing the attestation result
+     *
+     * @param id            the id of the attestation result
+     * @param workerFactory the factory to create a worker processing the attestation result
      */
-    public void processAttestationResult(long id, AttestationWorker worker) {
+    public void processAttestationResult(long id, AttestationWorkerFactory workerFactory) {
         SqlSession session = sessionFactory.openSession();
 
         try {
@@ -83,16 +88,21 @@ public class AttestationResultService {
                 return;
             }
 
+            AttestationWorker worker = workerFactory.createWorker(result.getResultType());
+
+            boolean success = false;
             LOGGER.info("AttestationResult with id {} selected for processing", id);
-            boolean success = worker.process(session, result);
-            if (success) {
-                result.setStatus(AttestationStatus.SUCCEEDED);
-                result.setAttested(OffsetDateTime.now());
+
+            if (result.getStatus().isProcessingAttestationRequest()) {
+                success = worker.processAttestationRequest(session, result);
             }
-            else {
-                result.setStatus(AttestationStatus.FAILED);
-                result.setAttested(null);
+
+            if (result.getStatus().isProcessingAttestationVerification()) {
+                success = worker.processAttestationVerification(session, result);
+                result.setAttested(success ? OffsetDateTime.now() : null);
             }
+
+            result.setStatus(result.getStatus().getProcessingResultStatus(success));
 
             session.update("AttestationResult.update", result);
             session.commit();
@@ -109,7 +119,8 @@ public class AttestationResultService {
 
     private static AttestationResult lockAttestationResult(SqlSession session, long id) {
         try {
-            return session.selectOne("AttestationResult.selectForUpdate", id);
+            return session.selectOne("AttestationResult.selectForUpdate",
+                    Map.of("statusToListenList", AttestationStatus.statusToListenList(), "id", id));
         }
         catch (PersistenceException ex) {
             // If the error was due to the row being lock, just return null no need
