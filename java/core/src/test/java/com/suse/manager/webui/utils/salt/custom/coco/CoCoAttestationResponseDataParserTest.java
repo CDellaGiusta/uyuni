@@ -357,9 +357,119 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
     private static final String AMD_EXPECTED_SECURE_BOOT_RESULT = "EFI variables are not supported on this system";
 
 
+    //suppress checkstyle warnings in order to keep it as it appears in the file
+    @SuppressWarnings("checkstyle:lineLength")
+    private static final String IBM_SALT_STATE_JSON_INPUT_STRING = """
+            {
+               "file_|-mgr_create_attestdir_|-/tmp/cocoattest_|-directory":{
+                  "name":"/tmp/cocoattest",
+                  "changes":{
+                  },
+                  "result":true,
+                  "comment":"The directory /tmp/cocoattest is in the correct state",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":11,
+                  "start_time":"11:05:11.951561",
+                  "duration":0.763,
+                  "__id__":"mgr_create_attestdir"
+               },
+               "pkg_|-mgr_inst_pvattest_|-mgr_inst_pvattest_|-latest":{
+                  "name":"mgr_inst_pvattest",
+                  "changes":{
+                  },
+                  "result":true,
+                  "comment":"Package s390-tools is already up-to-date",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":12,
+                  "start_time":"11:05:11.952450",
+                  "duration":425.069,
+                  "__id__":"mgr_inst_pvattest"
+               },
+               "cmd_|-mgr_write_attestation_request_|-/usr/bin/echo \\"cHZhdHRlc3QAAAEAAAAB0AAAAAAAAAAAAAABkAAAAEAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAZCJFE9dEsHIrsyuUjIAAAAAAAAAAAAAAAEAAAAAAAAAUHAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAADBQUSlP2Iq5u6Qn18quEHeU3DuLvPqxP2iKouQ63R3DIPsRHgpaHFG29fcV16PEkpHYJwPTJN0BRI/zCoNdWKz+gAAAAAAAAAAAAAAAAAAAAktF96/6YqRQEIProQTLG2WpSub2f/eqOsigaYq2KYjMopmVNK3iJaXY2AnBk3viMngesYo6yIuzQRgQQvKp/SV0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDy7mpjygjWJEgBR/epItEP8w/QyEZaHGtWF3gmL6s3r3J6AvPyQB0ZywzZfYwnCXNJ2vUnOMUtMcPvHh69fuyZ1vpsJ7Be57u6vgZzpu1hyZn4xDbIx4eyS64bjh8Lk3Pqv1sbVduTd02xPavw+B+TviLiasIRZH/6oTMWvBVyM/1QwcFQkieV+OTgtjd7ePhI=\\" | /usr/bin/base64 -d > /tmp/cocoattest/attestation_request.bin_|-run":{
+                  "name":"/usr/bin/echo \\"cHZhdHRlc3QAAAEAAAAB0AAAAAAAAAAAAAABkAAAAEAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAZCJFE9dEsHIrsyuUjIAAAAAAAAAAAAAAAEAAAAAAAAAUHAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAADBQUSlP2Iq5u6Qn18quEHeU3DuLvPqxP2iKouQ63R3DIPsRHgpaHFG29fcV16PEkpHYJwPTJN0BRI/zCoNdWKz+gAAAAAAAAAAAAAAAAAAAAktF96/6YqRQEIProQTLG2WpSub2f/eqOsigaYq2KYjMopmVNK3iJaXY2AnBk3viMngesYo6yIuzQRgQQvKp/SV0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDy7mpjygjWJEgBR/epItEP8w/QyEZaHGtWF3gmL6s3r3J6AvPyQB0ZywzZfYwnCXNJ2vUnOMUtMcPvHh69fuyZ1vpsJ7Be57u6vgZzpu1hyZn4xDbIx4eyS64bjh8Lk3Pqv1sbVduTd02xPavw+B+TviLiasIRZH/6oTMWvBVyM/1QwcFQkieV+OTgtjd7ePhI=\\" | /usr/bin/base64 -d > /tmp/cocoattest/attestation_request.bin",
+                  "changes":{
+                     "pid":30764,
+                     "retcode":0,
+                     "stdout":"",
+                     "stderr":""
+                  },
+                  "result":true,
+                  "comment":"Command \\"/usr/bin/echo \\"cHZhdHRlc3QAAAEAAAAB0AAAAAAAAAAAAAABkAAAAEAAAABAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAZCJFE9dEsHIrsyuUjIAAAAAAAAAAAAAAAEAAAAAAAAAUHAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAADBQUSlP2Iq5u6Qn18quEHeU3DuLvPqxP2iKouQ63R3DIPsRHgpaHFG29fcV16PEkpHYJwPTJN0BRI/zCoNdWKz+gAAAAAAAAAAAAAAAAAAAAktF96/6YqRQEIProQTLG2WpSub2f/eqOsigaYq2KYjMopmVNK3iJaXY2AnBk3viMngesYo6yIuzQRgQQvKp/SV0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDy7mpjygjWJEgBR/epItEP8w/QyEZaHGtWF3gmL6s3r3J6AvPyQB0ZywzZfYwnCXNJ2vUnOMUtMcPvHh69fuyZ1vpsJ7Be57u6vgZzpu1hyZn4xDbIx4eyS64bjh8Lk3Pqv1sbVduTd02xPavw+B+TviLiasIRZH/6oTMWvBVyM/1QwcFQkieV+OTgtjd7ePhI=\\" | /usr/bin/base64 -d > /tmp/cocoattest/attestation_request.bin\\" run",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":13,
+                  "start_time":"11:05:12.377776",
+                  "duration":8.077,
+                  "__id__":"mgr_write_attestation_request"
+               },
+               "cmd_|-mgr_write_random_user_nonce_|-/usr/bin/echo \\"iLD8/5ED4Hdlb/xHDhpqXvBUCJe+ydkiferW25G7iyJ8M81XiprRk0B/3tWGe3AETigbt98Vm6KpumVfhPLEiYW4S6AmYaMfqdb5EnpVyhckyWZQZAzNrsFMQHePwTVEOh0pFDn/xXv2uyfMS0RH9OCylTj/F63vwAoadV/Z9pfF1Fg/yxupA9jQjaW0ftGoKO1o4vEGoJhGJW0rJok2J1+ahu969zntK8EwNfxxglt14PRMSHZXZENzbr1dqYylqzXQQrFSbUomPfD5F/T5vhTpFJDZm8PrY3oZAhN3SDewm1fpEgiL8/lS1VpjIjwf6XkF9Y+gb5fxYmTPBN6G1w==\\" | /usr/bin/base64 -d > /tmp/cocoattest/random_user_nonce.bin_|-run":{
+                  "name":"/usr/bin/echo \\"iLD8/5ED4Hdlb/xHDhpqXvBUCJe+ydkiferW25G7iyJ8M81XiprRk0B/3tWGe3AETigbt98Vm6KpumVfhPLEiYW4S6AmYaMfqdb5EnpVyhckyWZQZAzNrsFMQHePwTVEOh0pFDn/xXv2uyfMS0RH9OCylTj/F63vwAoadV/Z9pfF1Fg/yxupA9jQjaW0ftGoKO1o4vEGoJhGJW0rJok2J1+ahu969zntK8EwNfxxglt14PRMSHZXZENzbr1dqYylqzXQQrFSbUomPfD5F/T5vhTpFJDZm8PrY3oZAhN3SDewm1fpEgiL8/lS1VpjIjwf6XkF9Y+gb5fxYmTPBN6G1w==\\" | /usr/bin/base64 -d > /tmp/cocoattest/random_user_nonce.bin",
+                  "changes":{
+                     "pid":30768,
+                     "retcode":0,
+                     "stdout":"",
+                     "stderr":""
+                  },
+                  "result":true,
+                  "comment":"Command \\"/usr/bin/echo \\"iLD8/5ED4Hdlb/xHDhpqXvBUCJe+ydkiferW25G7iyJ8M81XiprRk0B/3tWGe3AETigbt98Vm6KpumVfhPLEiYW4S6AmYaMfqdb5EnpVyhckyWZQZAzNrsFMQHePwTVEOh0pFDn/xXv2uyfMS0RH9OCylTj/F63vwAoadV/Z9pfF1Fg/yxupA9jQjaW0ftGoKO1o4vEGoJhGJW0rJok2J1+ahu969zntK8EwNfxxglt14PRMSHZXZENzbr1dqYylqzXQQrFSbUomPfD5F/T5vhTpFJDZm8PrY3oZAhN3SDewm1fpEgiL8/lS1VpjIjwf6XkF9Y+gb5fxYmTPBN6G1w==\\" | /usr/bin/base64 -d > /tmp/cocoattest/random_user_nonce.bin\\" run",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":14,
+                  "start_time":"11:05:12.385980",
+                  "duration":7.628,
+                  "__id__":"mgr_write_random_user_nonce"
+               },
+               "cmd_|-mgr_create_pvattest_response_|-/usr/bin/pvattest perform --help_|-run":{
+                  "name":"/usr/bin/pvattest perform --help",
+                  "changes":{
+                     "pid":30771,
+                     "retcode":0,
+                     "stdout":"Send the attestation request to the Ultravisor.\\n\\nRun a measurement of this system through ’/dev/uv’. This device must be accessible and the\\nattestation Ultravisor facility must be present. The input must be an attestation request created\\nwith ’pvattest create’. Output will contain the original request and the response from the\\nUltravisor.\\n\\nUsage: pvattest perform [OPTIONS]\\n\\nOptions:\\n  -u, --user-data <File>\\n          Provide up to 256 bytes of user input\\n          \\n          User-data is arbitrary user-defined data appended to the Attestation measurement. It is\\n          verified during the Attestation measurement verification. May be any arbitrary data, as\\n          long as it is less or equal to 256 bytes\\n\\n  -h, --help\\n          Print help (see a summary with '-h')\\n\\n  -q, --quiet...\\n          Provide less output\\n\\n  -v, --verbose...\\n          Provide more detailed output",
+                     "stderr":""
+                  },
+                  "result":true,
+                  "comment":"Command \\"/usr/bin/pvattest perform --help\\" run",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":15,
+                  "start_time":"11:05:12.393911",
+                  "duration":4.647,
+                  "__id__":"mgr_create_pvattest_response"
+               },
+               "cmd_|-mgr_pvattest_response_|-/usr/bin/cat /tmp/cocoattest/response.bin | /usr/bin/base64_|-run":{
+                  "name":"/usr/bin/cat /tmp/cocoattest/attestation_report.bin | /usr/bin/base64",
+                  "changes":{
+                     "pid":30772,
+                     "retcode":0,
+                     "stdout":"cHZhdHRlc3QAAAEAAAACjgAAAAAAAAAAAAABkAAAAEAAAABAAAAB0AAAAEAAAAIQAAAALgAAAlAA\\nAAAQAAACfgAAAAAAAAAAAAABAAAAAZCz8o95xyTM/kw2NpEAAAAAAAAAAAAAAAEAAAAAAAAAUHAA\\nAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAFvqBTUY6O9+2KbhNpR5fcQCQgucHom6tR9JYnm\\n+ZAH/Wf6+ikMpFZbkdFbLZ1ghGzbvvZsb4PMznaJJlEaI+KP8gAAAAAAAAAAAAAAAAAAAAaISFiz\\nbu+oqU8lxJuPX+4byOUxYM5nI+8D6UBZYncOqefx9bc9FQRbc8PFjs/BR4sADEmh29D1xSaTJhrE\\nUjHk0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDyulCLYGJHPxM7XnSDNDjR9mIqNKn4b\\n/9KtXp1yvZNtImaxOY/Y+cM2ECxVNK2c1/2/G7BpkNzfrnugTvIX/TTXHCHNOkwyl0iqpPI+r9dO\\nKVa1McWfnOuGTGsVj7DRVwFeWELRTTAtS3Cr1TPHkTpEcdltCrKqPpyFPrJ/kL0ok+t7WSb+CbyW\\nyQWTIZLcx3IIBMiN2p4+GOGFKHhjGmz5Nf3jEX2bmBeu8qmXt/8//x0avZGO0gc5UXx/+X7rwra3\\nZJkggHZl3pGRFpkGn8Bd0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDzR9yjv2Z4dplDn\\nWFEmIaZfndjXfY00sdu7VpBOs3O4PHJhbmRvbSB1c2VyIGRhdGEgZm9yIHN0YW5kYXJkX2F0dGVt\\ncHRfNV8wM18xNgo+uRJTljTNzmYKuEAgkZDi",
+                     "stderr":""
+                  },
+                  "result":true,
+                  "comment":"Command \\"/usr/bin/cat /tmp/cocoattest/response.bin | /usr/bin/base64\\" run",
+                  "__sls__":"cocoattest.ibm_z_pvattest_request",
+                  "__run_num__":16,
+                  "start_time":"11:05:12.398814",
+                  "duration":2.228,
+                  "__id__":"mgr_pvattest_response"
+               }
+            }
+            """;
+
+    private static final String IBM_EXPECTED_BASE_64_REPORT_DATA = """
+            cHZhdHRlc3QAAAEAAAACjgAAAAAAAAAAAAABkAAAAEAAAABAAAAB0AAAAEAAAAIQAAAALgAAAlAA
+            AAAQAAACfgAAAAAAAAAAAAABAAAAAZCz8o95xyTM/kw2NpEAAAAAAAAAAAAAAAEAAAAAAAAAUHAA
+            AAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAFvqBTUY6O9+2KbhNpR5fcQCQgucHom6tR9JYnm
+            +ZAH/Wf6+ikMpFZbkdFbLZ1ghGzbvvZsb4PMznaJJlEaI+KP8gAAAAAAAAAAAAAAAAAAAAaISFiz
+            bu+oqU8lxJuPX+4byOUxYM5nI+8D6UBZYncOqefx9bc9FQRbc8PFjs/BR4sADEmh29D1xSaTJhrE
+            UjHk0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDyulCLYGJHPxM7XnSDNDjR9mIqNKn4b
+            /9KtXp1yvZNtImaxOY/Y+cM2ECxVNK2c1/2/G7BpkNzfrnugTvIX/TTXHCHNOkwyl0iqpPI+r9dO
+            KVa1McWfnOuGTGsVj7DRVwFeWELRTTAtS3Cr1TPHkTpEcdltCrKqPpyFPrJ/kL0ok+t7WSb+CbyW
+            yQWTIZLcx3IIBMiN2p4+GOGFKHhjGmz5Nf3jEX2bmBeu8qmXt/8//x0avZGO0gc5UXx/+X7rwra3
+            ZJkggHZl3pGRFpkGn8Bd0fco79meHaZQ51hRJiGmX53Y132NNLHbu1aQTrNzuDzR9yjv2Z4dplDn
+            WFEmIaZfndjXfY00sdu7VpBOs3O4PHJhbmRvbSB1c2VyIGRhdGEgZm9yIHN0YW5kYXJkX2F0dGVt
+            cHRfNV8wM18xNgo+uRJTljTNzmYKuEAgkZDi""";
+
     private CoCoAttestationResponseDataParser responseDataParser;
     private Optional<CoCoAbstractAttestationResponseData> optAmdChunk;
     private Optional<CoCoAbstractAttestationResponseData> optBootChunk;
+    private Optional<CoCoAbstractAttestationResponseData> optIbmChunk;
 
     private void setUpAmdTest() {
         JsonElement jsonResult = JsonParser.parseString(AMD_SALT_STATE_JSON_INPUT_STRING);
@@ -367,6 +477,16 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
         responseDataParser.parse(jsonResult);
         optAmdChunk = responseDataParser.getChunk(CoCoAmdEpycAttestationResponseData.class);
         optBootChunk = responseDataParser.getChunk(CoCoSecureBootAttestationResponseData.class);
+        optIbmChunk = responseDataParser.getChunk(CoCoIbmZAttestationResponseData.class);
+    }
+
+    private void setUpIbmTest() {
+        JsonElement jsonResult = JsonParser.parseString(IBM_SALT_STATE_JSON_INPUT_STRING);
+        responseDataParser = new CoCoAttestationResponseDataParser();
+        responseDataParser.parse(jsonResult);
+        optAmdChunk = responseDataParser.getChunk(CoCoAmdEpycAttestationResponseData.class);
+        optBootChunk = responseDataParser.getChunk(CoCoSecureBootAttestationResponseData.class);
+        optIbmChunk = responseDataParser.getChunk(CoCoIbmZAttestationResponseData.class);
     }
 
     @Test
@@ -378,6 +498,8 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
         CoCoAmdEpycAttestationResponseData amdChunk = (CoCoAmdEpycAttestationResponseData)optAmdChunk.get();
         assertTrue(optBootChunk.isPresent());
         CoCoSecureBootAttestationResponseData bootChunk = (CoCoSecureBootAttestationResponseData)optBootChunk.get();
+        assertTrue(optIbmChunk.isPresent());
+        CoCoIbmZAttestationResponseData ibmChunk = (CoCoIbmZAttestationResponseData)optIbmChunk.get();
 
         Optional<StateApplyResult<CmdResult>> optResult;
 
@@ -398,6 +520,9 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
         assertEquals(AMD_EXPECTED_SECURE_BOOT_RESULT, optResult.get().getChanges().getStderr());
         assertTrue(bootChunk.getSecureBoot().isPresent());
         assertEquals(AMD_EXPECTED_SECURE_BOOT_RESULT, bootChunk.getSecureBoot().get().getChanges().getStderr());
+
+        optResult = responseDataParser.getResult(CoCoIbmZAttestationResponseData.PVATTEST_RESPONSE_TAG);
+        assertTrue(optResult.isEmpty());
     }
 
     @Test
@@ -409,6 +534,8 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
         CoCoAmdEpycAttestationResponseData amdChunk = (CoCoAmdEpycAttestationResponseData)optAmdChunk.get();
         assertTrue(optBootChunk.isPresent());
         CoCoSecureBootAttestationResponseData bootChunk = (CoCoSecureBootAttestationResponseData)optBootChunk.get();
+        assertTrue(optIbmChunk.isPresent());
+        CoCoIbmZAttestationResponseData ibmChunk = (CoCoIbmZAttestationResponseData)optIbmChunk.get();
 
         Map<String, Object> requestDataMap = responseDataParser.asMap();
         assertEquals(3, requestDataMap.size());
@@ -428,6 +555,64 @@ public class CoCoAttestationResponseDataParserTest extends JMockBaseTestCaseWith
         assertEquals(1, bootChunk.asMap().size());
         assertEquals(AMD_EXPECTED_SECURE_BOOT_RESULT,
                 bootChunk.asMap().get(CoCoSecureBootAttestationResponseData.SECURE_BOOT_ENABLED_TAG));
+
+        assertEquals(0, ibmChunk.asMap().size());
+    }
+
+    @Test
+    @DisplayName("check that parse() method is giving the expected results with IBM json result")
+    public void testIbmParsing() {
+        setUpIbmTest();
+
+        assertTrue(optAmdChunk.isPresent());
+        CoCoAmdEpycAttestationResponseData amdChunk = (CoCoAmdEpycAttestationResponseData)optAmdChunk.get();
+        assertTrue(optBootChunk.isPresent());
+        CoCoSecureBootAttestationResponseData bootChunk = (CoCoSecureBootAttestationResponseData)optBootChunk.get();
+        assertTrue(optIbmChunk.isPresent());
+        CoCoIbmZAttestationResponseData ibmChunk = (CoCoIbmZAttestationResponseData)optIbmChunk.get();
+
+        Optional<StateApplyResult<CmdResult>> optResult;
+
+        optResult = responseDataParser.getResult(CoCoAmdEpycAttestationResponseData.SNP_GUEST_RESPONSE_TAG);
+        assertTrue(optResult.isEmpty());
+
+        optResult = responseDataParser.getResult(CoCoAmdEpycAttestationResponseData.VLEK_CERTIFICATE_TAG);
+        assertTrue(optResult.isEmpty());
+
+        optResult = responseDataParser.getResult(CoCoSecureBootAttestationResponseData.SECURE_BOOT_ENABLED_TAG);
+        assertTrue(optResult.isEmpty());
+
+        optResult = responseDataParser.getResult(CoCoIbmZAttestationResponseData.PVATTEST_RESPONSE_TAG);
+        assertTrue(optResult.isPresent());
+        assertEquals(IBM_EXPECTED_BASE_64_REPORT_DATA, optResult.get().getChanges().getStdout());
+        assertTrue(ibmChunk.getPvattestResponse().isPresent());
+        assertEquals(IBM_EXPECTED_BASE_64_REPORT_DATA, ibmChunk.getPvattestResponse().get().getChanges().getStdout());
+    }
+
+    @Test
+    @DisplayName("check that asMap() method is giving the expected results with IBM json result")
+    public void testIbmAsMap() {
+        setUpIbmTest();
+
+        assertTrue(optAmdChunk.isPresent());
+        CoCoAmdEpycAttestationResponseData amdChunk = (CoCoAmdEpycAttestationResponseData)optAmdChunk.get();
+        assertTrue(optBootChunk.isPresent());
+        CoCoSecureBootAttestationResponseData bootChunk = (CoCoSecureBootAttestationResponseData)optBootChunk.get();
+        assertTrue(optIbmChunk.isPresent());
+        CoCoIbmZAttestationResponseData ibmChunk = (CoCoIbmZAttestationResponseData)optIbmChunk.get();
+
+        Map<String, Object> requestDataMap = responseDataParser.asMap();
+        assertEquals(1, requestDataMap.size());
+        assertEquals(IBM_EXPECTED_BASE_64_REPORT_DATA,
+                requestDataMap.get(CoCoIbmZAttestationResponseData.PVATTEST_RESPONSE_TAG));
+
+        assertEquals(0, amdChunk.asMap().size());
+
+        assertEquals(0, bootChunk.asMap().size());
+
+        assertEquals(1, ibmChunk.asMap().size());
+        assertEquals(IBM_EXPECTED_BASE_64_REPORT_DATA,
+                ibmChunk.asMap().get(CoCoIbmZAttestationResponseData.PVATTEST_RESPONSE_TAG));
     }
 
 

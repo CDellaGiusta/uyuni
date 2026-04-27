@@ -17,6 +17,8 @@ package com.suse.manager.model.attestation;
 import com.redhat.rhn.common.hibernate.HibernateFactory;
 import com.redhat.rhn.common.hibernate.LookupException;
 import com.redhat.rhn.domain.action.Action;
+import com.redhat.rhn.domain.action.ActionFactory;
+import com.redhat.rhn.domain.product.Tuple2;
 import com.redhat.rhn.domain.server.Server;
 import com.redhat.rhn.domain.user.User;
 import com.redhat.rhn.frontend.listview.PageControl;
@@ -27,6 +29,8 @@ import org.apache.logging.log4j.Logger;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
+
+import jakarta.persistence.Tuple;
 
 public class AttestationFactory extends HibernateFactory {
 
@@ -39,6 +43,7 @@ public class AttestationFactory extends HibernateFactory {
      * @return the managed {@link ServerCoCoAttestationConfig}
      */
     public ServerCoCoAttestationConfig save(ServerCoCoAttestationConfig cnf) {
+        CarloHack.hack(cnf);
         return saveObject(cnf);
     }
 
@@ -318,5 +323,44 @@ public class AttestationFactory extends HibernateFactory {
                         CoCoAttestationResult.class)
                 .setParameter("actionId", actionIn.getId())
                 .uniqueResultOptional();
+    }
+
+    /**
+     * Return a list of actions to schedule when CoCoAttestationResult is in QUEUED status
+     *
+     * @return returns a list of pairs [result id, action to schedule]
+     */
+    public List<Tuple2<Long, Action>> listActionsForCoCoQueuedResults() {
+        List<Tuple2<Long, Long>> resultIdActionIdList = getSession().createQuery("""
+                        SELECT res.id, rpt.action.id
+                        FROM CoCoAttestationResult res
+                        JOIN ServerCoCoAttestationReport rpt
+                            ON rpt.id = res.report.id
+                        WHERE res.status = :status
+                        """, Tuple.class)
+                .setParameter("status", CoCoResultStatus.QUEUED)
+                .stream()
+                .map(r -> new Tuple2<>(r.get(0, Long.class), r.get(1, Long.class)))
+                .toList();
+
+        return resultIdActionIdList.stream()
+                .map(resAct -> new Tuple2<>(resAct.getA(), ActionFactory.lookupById(resAct.getB())))
+                .toList();
+    }
+
+    /**
+     * Sets the status to PENDING to a list of results
+     * @param resultIds list of result ids to set as PENDING status
+     */
+    public void setResultsToPending(List<Long> resultIds) {
+        HibernateFactory.getSession().
+                createMutationQuery("""
+                            UPDATE CoCoAttestationResult res
+                            SET res.status = :status
+                            WHERE res.id IN :ids
+                            """)
+                .setParameter("status", CoCoResultStatus.PENDING)
+                .setParameter("ids", resultIds)
+                .executeUpdate();
     }
 }

@@ -21,7 +21,8 @@ import java.util.Arrays;
 public enum CoCoResultType {
     NONE(0, ""),
     SEV_SNP(1, "cocoattest.amd_epyc_snpguest_request"),
-    SECURE_BOOT(2, "cocoattest.secure_boot");
+    SECURE_BOOT(2, "cocoattest.secure_boot"),
+    IBM_PVATTEST(3, "cocoattest.ibm_z_pvattest_request");
     // ATTENTION: KEEP CoCoAttestationReport_queries.xml up to date !
 
     private final int value;
