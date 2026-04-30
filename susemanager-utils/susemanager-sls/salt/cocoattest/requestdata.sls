@@ -23,18 +23,18 @@ mgr_write_request_data:
     - require:
       - file: mgr_create_attestdir
 
-mgr_create_snpguest_report:
+mgr_create_snpguest_response:
   cmd.run:
-    - name: /usr/bin/snpguest report /tmp/cocoattest/report.bin /tmp/cocoattest/request-data.txt
+    - name: /usr/bin/snpguest report /tmp/cocoattest/response.bin /tmp/cocoattest/request-data.txt
     - require:
       - cmd: mgr_write_request_data
       - file: mgr_create_attestdir
 
-mgr_snpguest_report:
+mgr_snpguest_response:
   cmd.run:
-    - name: /usr/bin/cat /tmp/cocoattest/report.bin | /usr/bin/base64
+    - name: /usr/bin/cat /tmp/cocoattest/response.bin | /usr/bin/base64
     - require:
-      - cmd: mgr_create_snpguest_report
+      - cmd: mgr_create_snpguest_response
       - file: mgr_create_attestdir
 
 mgr_create_vlek_certificate:
