@@ -50,6 +50,22 @@ import jakarta.persistence.Entity;
 public class CoCoAttestationAction extends Action {
     private static final Logger LOG = LogManager.getLogger(CoCoAttestationAction.class);
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public boolean isReadyToRun() {
+        AttestationManager attestationManager = GlobalInstanceHolder.ATTESTATION_MANAGER;
+        Optional<ServerCoCoAttestationReport> optReport = attestationManager.lookupReportByAction(this);
+        if (optReport.isEmpty()) {
+            LOG.debug("Failed to find a report entry while checking for input data");
+            return false;
+        }
+        ServerCoCoAttestationReport report = optReport.get();
+
+        return report.hasAllInputDataFromResults();
+    }
+
     @Override
     public void onFailAction(ServerAction serverActionIn) {
         AttestationManager attestationManager = GlobalInstanceHolder.ATTESTATION_MANAGER;
