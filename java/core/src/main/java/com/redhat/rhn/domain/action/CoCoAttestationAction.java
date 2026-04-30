@@ -33,6 +33,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -77,10 +78,29 @@ public class CoCoAttestationAction extends Action {
      */
     @Override
     public Map<LocalCall<?>, List<MinionSummary>> getSaltCalls(List<MinionSummary> minionSummaries) {
-        return Map.of(
-                State.apply(Collections.singletonList(SaltParameters.COCOATTEST_REQUESTDATA), Optional.empty()),
-                minionSummaries
-        );
+        AttestationManager attestationManager = GlobalInstanceHolder.ATTESTATION_MANAGER;
+        Optional<ServerCoCoAttestationReport> optReport = attestationManager.lookupReportByAction(this);
+        if (optReport.isEmpty()) {
+            LOG.debug("Failed to find a report entry while creating the pillar data");
+            return Map.of();
+        }
+        ServerCoCoAttestationReport report = optReport.get();
+
+        report.mergeInputDataFromResults();
+
+        //pillar data sent to minion during coco attestation is cryptographically safe by design!
+        return Map.of(State.apply(Collections.singletonList(SaltParameters.COCOATTEST_REQUESTDATA),
+                        createPillarData(report)), minionSummaries);
+    }
+
+    private Optional<Map<String, Object>> createPillarData(ServerCoCoAttestationReport report) {
+        Map<String, Object> attestationPillar = new HashMap<>(report.getInData());
+        attestationPillar.put("environment_type", report.getEnvironmentType().name());
+
+        Map<String, Object> pillarData = new HashMap<>();
+        pillarData.put("attestation_data", attestationPillar);
+
+        return Optional.of(pillarData);
     }
 
     /**
