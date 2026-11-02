@@ -12,11 +12,15 @@
  */
 package com.redhat.rhn.domain.common;
 
+import com.redhat.rhn.common.localization.LocalizationService;
+import com.redhat.rhn.common.validator.ValidatorResult;
 import com.redhat.rhn.domain.BaseDomainHelper;
 
 import org.apache.commons.lang3.StringUtils;
 
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -100,6 +104,10 @@ public class RhnConfiguration extends BaseDomainHelper {
         public boolean isHidden() {
             return visibility == Visibility.HIDDEN;
         }
+
+        public boolean isBoolean() {
+            return type == ValueType.BOOLEAN;
+        }
     }
 
     @Id
@@ -123,39 +131,163 @@ public class RhnConfiguration extends BaseDomainHelper {
     @Column(name = "modified", nullable = false)
     private Date modified;
 
-    public KEYS getKey() {
-        return key;
-    }
-
-    public void setKey(KEYS keyIn) {
-        key = keyIn;
-    }
-
     public String getDescription() {
         return description;
     }
 
-    public void setDescription(String descriptionIn) {
-        description = descriptionIn;
+    public boolean isVisible() {
+        return !key.isHidden();
     }
 
-    public String getValue() {
+    public boolean isHidden() {
+        return key.isHidden();
+    }
+
+    public void setValue(Object valueIn) {
+        String newValue = valueIn == null ? null : StringUtils.trimToNull(String.valueOf(valueIn));
+        boolean isDefault = key.isBoolean() ?
+                toBoolean(newValue) == toBoolean(defaultValue) :
+                newValue == null || newValue.equals(StringUtils.trimToNull(defaultValue));
+
+        if (isDefault) {
+            newValue = null;
+        }
+        value = newValue;
+    }
+
+    public void validate(String valueIn, ValidatorResult result) {
+        String val = StringUtils.trimToEmpty(valueIn);
+        if (val.isEmpty()) {
+            return;
+        }
+        switch (key.getType()) {
+            case INTEGER -> {
+                try {
+                    Long.parseLong(val);
+                }
+                catch (NumberFormatException e) {
+                    result.addFieldError(key.name(), "server_settings.error.integer", key.name());
+                }
+            }
+            case BOOLEAN -> {
+                // stored as Boolean, so it is compared with the default value by meaning
+                if (!val.equals("true") && !val.equals("false")) {
+                    result.addFieldError(key.name(), "server_settings.error.boolean", key.name());
+                }
+            }
+            default -> {
+            }
+        }
+    }
+
+    public void resetToDefault() {
+        value = null;
+    }
+
+    public String getAsString() {
+        return StringUtils.trimToNull(StringUtils.isBlank(value) ? defaultValue : value);
+    }
+
+    public Integer getAsInteger() {
+        return toInteger(getAsString());
+    }
+
+    public Long getAsLong() {
+        return toLong(getAsString());
+    }
+
+    public boolean getAsBoolean() {
+        return toBoolean(getAsString());
+    }
+
+    public List<String> getAsList() {
+        return toList(getAsString());
+    }
+
+
+    public String getDefaultAsString() {
+        return StringUtils.trimToNull(defaultValue);
+    }
+
+
+    public Integer getDefaultAsInteger() {
+        return toInteger(getDefaultAsString());
+    }
+
+
+    public Long getDefaultAsLong() {
+        return toLong(getDefaultAsString());
+    }
+
+
+    public boolean getDefaultAsBoolean() {
+        return toBoolean(getDefaultAsString());
+    }
+
+
+    public List<String> getDefaultAsList() {
+        return toList(getDefaultAsString());
+    }
+
+
+    private static Integer toInteger(String value) {
+        return value == null ? null : Integer.valueOf(value);
+    }
+
+    private static Long toLong(String value) {
+        return value == null ? null : Long.valueOf(value);
+    }
+
+    private static final List<String> TRUE_VALUES = List.of("1", "y", "true", "yes", "on");
+
+    private static boolean toBoolean(String value) {
+        return value != null && TRUE_VALUES.contains(value.toLowerCase());
+    }
+
+    private static List<String> toList(String value) {
+        if (value == null) {
+            return List.of();
+        }
+        return Arrays.stream(value.split(",")).map(String::trim).filter(v -> !v.isEmpty()).toList();
+    }
+
+    public String getTranslatedDescription() {
+        LocalizationService ls = LocalizationService.getInstance();
+        String messageId = getDescriptionMessageId();
+        return ls.hasMessage(messageId) ? ls.getMessage(messageId) : description;
+    }
+
+    public String getDescriptionMessageId() {
+        return "server_settings.description." + key.name();
+    }
+
+    public String getUIName() {
+        return key.name();
+    }
+
+    public String getUIType() {
+        return key.type.toString();
+    }
+
+    public String getUIValue() {
+        return key.isBoolean() ? String.valueOf(getAsBoolean()) : getAsString();
+    }
+
+    public String getUIDefaultValue() {
+        return key.isBoolean() ? String.valueOf(getDefaultAsBoolean()) : getDefaultAsString();
+    }
+
+    public boolean isUIModified() {
+        return StringUtils.isNotBlank(value);
+    }
+
+    //CARLO: the following 2 methods can be mocked since they are used only for testing
+    public String testGetStoredValue() {
         return value;
     }
 
-    public void setValue(String valueIn) {
-        value = valueIn;
-    }
-
-    public String getDefaultValue() {
-        return defaultValue;
-    }
-
-    /**
-     * @return the value or the default value when no value is set or the value is blank
-     */
-    public String getEffectiveValue() {
-        return StringUtils.isBlank(value) ? defaultValue : value;
+    public void testSetDescription(String descriptionIn) {
+        description = descriptionIn;
     }
 
 }

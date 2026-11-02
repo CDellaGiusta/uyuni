@@ -18,13 +18,14 @@
 package com.redhat.rhn.domain.common;
 
 import com.redhat.rhn.common.hibernate.HibernateFactory;
+import com.redhat.rhn.common.validator.ValidatorException;
+import com.redhat.rhn.common.validator.ValidatorResult;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Access to the configuration values stored in the rhnConfiguration table.
@@ -37,8 +38,6 @@ public class RhnConfigurationFactory extends HibernateFactory {
     private static final Logger LOG = LogManager.getLogger(RhnConfigurationFactory.class);
 
     private static final RhnConfigurationFactory SINGLETON = new RhnConfigurationFactory();
-
-    private static final List<String> TRUE_VALUES = List.of("1", "y", "true", "yes", "on");
 
     /**
      * Configuration Factory default Constructor
@@ -65,6 +64,9 @@ public class RhnConfigurationFactory extends HibernateFactory {
         return getSession().createQuery("FROM RhnConfiguration ORDER BY key", RhnConfiguration.class).list();
     }
 
+    public List<RhnConfiguration> listVisible() {
+        return listAll().stream().filter(RhnConfiguration::isVisible).toList();
+    }
     /**
      * get a list of configurations by key
      *
@@ -90,6 +92,31 @@ public class RhnConfigurationFactory extends HibernateFactory {
         return configuration;
     }
 
+    //CARLO: Probably this method should "in theory" be divided in two parts: first in the factory, the second in the service
+    public RhnConfiguration lookupVisibleKey(String keyName) throws ValidatorException{
+        //CARLO: this part is database, so it should stay in the factory
+        Optional<RhnConfiguration> optConfiguration = getSession().createNativeQuery("""
+                        SELECT * FROM RhnConfiguration rc
+                        WHERE rc.key = :keyName
+                        """, RhnConfiguration.class)
+                .setParameter("keyName", keyName)
+                .uniqueResultOptional();
+
+        //CARLO: this part should "in theory" go to the service, or even to the controller?
+        if (optConfiguration.isEmpty()) {
+            ValidatorResult result = new ValidatorResult();
+            result.addError("server_settings.error.unknown_key", keyName);
+            throw new ValidatorException(result);
+        }
+        else if (optConfiguration.get().isHidden()) {
+            ValidatorResult result = new ValidatorResult();
+            result.addError("server_settings.error.hidden_key", keyName);
+            throw new ValidatorException(result);
+        }
+        return optConfiguration.get();
+    }
+
+    //CARLO: the following methods should "in theory" go to the service, since they are handling stuff
     /**
      * Set the value of a configuration key.
      * Setting null, a blank value or the default value removes the value, so the default value is used.
@@ -99,14 +126,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      */
     public void setValue(RhnConfiguration.KEYS keyIn, Object valueIn) {
         RhnConfiguration configuration = getConfiguration(keyIn);
-        String newValue = valueIn == null ? null : StringUtils.trimToNull(String.valueOf(valueIn));
-        boolean isDefault = valueIn instanceof Boolean booleanValue ?
-                booleanValue == toBoolean(configuration.getDefaultValue()) :
-                newValue == null || newValue.equals(StringUtils.trimToNull(configuration.getDefaultValue()));
-        if (isDefault) {
-            newValue = null;
-        }
-        configuration.setValue(newValue);
+        configuration.setValue(valueIn);
         getSession().persist(configuration);
     }
 
@@ -116,7 +136,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @param keyIn the key
      */
     public void resetToDefault(RhnConfiguration.KEYS keyIn) {
-        setValue(keyIn, null);
+        getConfiguration(keyIn).resetToDefault();
     }
 
     /**
@@ -125,7 +145,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the string value or null when empty
      */
     public String getString(RhnConfiguration.KEYS keyIn) {
-        return StringUtils.trimToNull(getConfiguration(keyIn).getEffectiveValue());
+        return getConfiguration(keyIn).getAsString();
     }
 
     /**
@@ -134,7 +154,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the integer value or null when empty
      */
     public Integer getInteger(RhnConfiguration.KEYS keyIn) {
-        return toInteger(getString(keyIn));
+        return getConfiguration(keyIn).getAsInteger();
     }
 
     /**
@@ -143,7 +163,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the long value or null when empty
      */
     public Long getLong(RhnConfiguration.KEYS keyIn) {
-        return toLong(getString(keyIn));
+        return getConfiguration(keyIn).getAsLong();
     }
 
     /**
@@ -152,7 +172,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the boolean value, false when empty
      */
     public boolean getBoolean(RhnConfiguration.KEYS keyIn) {
-        return toBoolean(getString(keyIn));
+        return getConfiguration(keyIn).getAsBoolean();
     }
 
     /**
@@ -161,7 +181,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the comma separated value as list, empty when the value is empty
      */
     public List<String> getList(RhnConfiguration.KEYS keyIn) {
-        return toList(getString(keyIn));
+        return getConfiguration(keyIn).getAsList();
     }
 
     /**
@@ -170,7 +190,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the string value or null when empty
      */
     public String getDefaultString(RhnConfiguration.KEYS keyIn) {
-        return StringUtils.trimToNull(getConfiguration(keyIn).getDefaultValue());
+        return getConfiguration(keyIn).getDefaultAsString();
     }
 
     /**
@@ -179,7 +199,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the integer value or null when empty
      */
     public Integer getDefaultInteger(RhnConfiguration.KEYS keyIn) {
-        return toInteger(getDefaultString(keyIn));
+        return getConfiguration(keyIn).getDefaultAsInteger();
     }
 
     /**
@@ -188,7 +208,7 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the long value or null when empty
      */
     public Long getDefaultLong(RhnConfiguration.KEYS keyIn) {
-        return toLong(getDefaultString(keyIn));
+        return getConfiguration(keyIn).getDefaultAsLong();
     }
 
     /**
@@ -197,34 +217,6 @@ public class RhnConfigurationFactory extends HibernateFactory {
      * @return the boolean value, false when empty
      */
     public boolean getDefaultBoolean(RhnConfiguration.KEYS keyIn) {
-        return toBoolean(getDefaultString(keyIn));
-    }
-
-    /**
-     * get the default value of a configuration key
-     * @param keyIn the key
-     * @return the comma separated value as list, empty when the value is empty
-     */
-    public List<String> getDefaultList(RhnConfiguration.KEYS keyIn) {
-        return toList(getDefaultString(keyIn));
-    }
-
-    private static Integer toInteger(String value) {
-        return value == null ? null : Integer.valueOf(value);
-    }
-
-    private static Long toLong(String value) {
-        return value == null ? null : Long.valueOf(value);
-    }
-
-    private static boolean toBoolean(String value) {
-        return value != null && TRUE_VALUES.contains(value.toLowerCase());
-    }
-
-    private static List<String> toList(String value) {
-        if (value == null) {
-            return List.of();
-        }
-        return Arrays.stream(value.split(",")).map(String::trim).filter(v -> !v.isEmpty()).toList();
+        return getConfiguration(keyIn).getDefaultAsBoolean();
     }
 }
